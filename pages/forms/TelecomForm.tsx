@@ -35,41 +35,34 @@ export const TelecomForm: React.FC<TelecomFormProps> = ({ onBack }) => {
   };
 
   return (
-    <div className="flex flex-col relative font-sans bg-[#F8FAFC] rounded-[2rem] border border-white/60 shadow-xl overflow-hidden">
+    <div className="flex flex-col relative font-sans bg-white/60 backdrop-blur-xl rounded-[2.5rem] border border-white/60 shadow-2xl overflow-hidden transition-all duration-500">
       
-      {/* Background Ambience */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
-         <div className="absolute -top-[20%] -right-[20%] w-[800px] h-[800px] bg-[#064E3B]/5 rounded-full blur-[120px]"></div>
-         <div className="absolute -bottom-[20%] -left-[20%] w-[600px] h-[600px] bg-[#D4AF37]/5 rounded-full blur-[100px]"></div>
-         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-soft-light"></div>
-      </div>
-
       {/* HEADER */}
-      <div className="relative z-20 bg-white/80 backdrop-blur-xl border-b border-white/60 shadow-sm transition-all px-8 py-5">
-         <div className="flex items-center justify-between gap-6 mb-6">
-             <div className="flex items-center gap-5">
-                 <button onClick={onBack} className="p-2.5 rounded-xl hover:bg-gray-100 text-gray-600 transition-all border border-transparent hover:border-gray-200"><ArrowLeft size={20} /></button>
-                 <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg shadow-[#064E3B]/20 bg-gradient-to-br from-[#064E3B] to-[#042f24] text-white ring-4 ring-white">
-                        <Signal size={24} />
+      <div className="relative z-20 bg-white/40 backdrop-blur-lg border-b border-white/50 px-8 py-6">
+         <div className="flex items-center justify-between gap-6 mb-8">
+             <div className="flex items-center gap-6">
+                 <button onClick={onBack} className="p-3 rounded-2xl hover:bg-white text-gray-500 hover:text-[#064E3B] transition-all border border-transparent hover:border-gray-200 shadow-sm"><ArrowLeft size={22} /></button>
+                 <div className="flex items-center gap-5">
+                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg shadow-[#064E3B]/20 bg-gradient-to-br from-[#064E3B] to-[#042f24] text-white ring-4 ring-white/50">
+                        <Signal size={32} strokeWidth={1.5} />
                     </div>
                     <div>
-                        <h1 className="text-xl font-bold text-[#064E3B] leading-none font-playfair">Telekomunikasi</h1>
-                        <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mt-1.5">Provider & Roaming</p>
+                        <h1 className="text-2xl font-bold text-[#064E3B] leading-none tracking-tight font-playfair mb-1.5">Telekomunikasi</h1>
+                        <p className="text-[11px] font-bold text-[#D4AF37] uppercase tracking-widest bg-[#D4AF37]/10 inline-block px-2 py-0.5 rounded-md border border-[#D4AF37]/20">Provider & Roaming</p>
                     </div>
                  </div>
              </div>
              
-             <button onClick={onBack} className="flex items-center gap-2 px-6 py-2.5 bg-[#064E3B] hover:bg-[#053d2e] text-white rounded-xl shadow-lg shadow-[#064E3B]/20 text-sm font-bold transition-all transform hover:translate-y-[-2px] hover:shadow-xl">
+             <button onClick={onBack} className="flex items-center gap-2 px-6 py-3 bg-[#064E3B] hover:bg-[#053d2e] text-white rounded-xl shadow-lg shadow-[#064E3B]/20 text-sm font-bold transition-all transform hover:translate-y-[-2px] hover:shadow-xl">
                 <Save size={18} /> <span>Simpan Data</span>
              </button>
          </div>
 
          {/* Identity Panel */}
-         <div className="bg-white/50 backdrop-blur-md border border-white/60 rounded-2xl p-6 shadow-sm">
-              <div className="flex items-center gap-2 mb-6 pb-4 border-b border-gray-200/60">
-                <div className="p-1.5 bg-[#064E3B]/10 rounded-lg"><FileText size={16} className="text-[#064E3B]" /></div>
-                <h3 className="text-xs font-bold text-gray-800 uppercase tracking-widest">A. Identitas Responden</h3>
+         <div className="bg-white/40 backdrop-blur-md border border-white/60 rounded-3xl p-8 shadow-sm">
+              <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200/50">
+                <div className="p-2 bg-[#064E3B]/10 rounded-xl"><FileText size={18} className="text-[#064E3B]" /></div>
+                <h3 className="text-sm font-bold text-gray-800 uppercase tracking-widest">A. Identitas Responden</h3>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-6 gap-6">
                   <div className="md:col-span-2">
@@ -96,20 +89,20 @@ export const TelecomForm: React.FC<TelecomFormProps> = ({ onBack }) => {
                         key={prov.id} 
                         className={`relative rounded-3xl transition-all duration-300 overflow-hidden flex flex-col group
                         ${isActive 
-                            ? `bg-white shadow-[0_8px_30px_rgba(6,78,59,0.1)] ring-2 ring-[#064E3B]/30` 
-                            : 'bg-white/40 border border-white hover:bg-white hover:shadow-lg opacity-80 hover:opacity-100'}`}
+                            ? `bg-white shadow-[0_10px_30px_rgba(6,78,59,0.1)] ring-2 ring-[#064E3B]/30` 
+                            : 'bg-white/30 border border-white hover:bg-white hover:shadow-lg opacity-80 hover:opacity-100'}`}
                     >
                        <div className="p-8 flex-1 flex flex-col">
                            <div className="flex justify-between items-start mb-8">
                                {/* Brand Icon stays branded for recognition, but frame is uniform */}
-                               <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-bold shadow-lg shadow-gray-200 ${theme.bg} ${prov.providerName.includes('Indosat') ? 'text-black' : 'text-white'}`}>
+                               <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-3xl font-bold shadow-lg shadow-gray-200 ${theme.bg} ${prov.providerName.includes('Indosat') ? 'text-black' : 'text-white'}`}>
                                     {prov.providerName.charAt(0)}
                                </div>
                                <Toggle checked={!!isActive} onChange={() => toggleProvider(prov.id)} />
                            </div>
 
                            <div className="mb-6">
-                               <h3 className={`text-xl font-bold mb-1 transition-colors ${isActive ? 'text-gray-900' : 'text-gray-500'}`}>
+                               <h3 className={`text-2xl font-bold font-playfair mb-1 transition-colors ${isActive ? 'text-gray-900' : 'text-gray-500'}`}>
                                    {prov.providerName}
                                </h3>
                                <p className={`text-[10px] font-bold uppercase tracking-widest ${isActive ? 'text-[#064E3B]' : 'text-gray-400'}`}>
@@ -125,7 +118,7 @@ export const TelecomForm: React.FC<TelecomFormProps> = ({ onBack }) => {
                                     <Input 
                                         value={prov.roamingPackage} 
                                         onChange={(e) => updatePackage(prov.id, e.target.value)} 
-                                        className={`!py-3 !px-4 !text-sm !bg-gray-50 focus:!bg-white !border-gray-200 focus:!border-[#064E3B] !rounded-xl !font-medium`} 
+                                        className={`!py-3.5 !px-4 !text-sm !bg-gray-50/50 focus:!bg-white !border-gray-200 focus:!border-[#064E3B] !rounded-xl !font-medium`} 
                                         placeholder="Contoh: Paket Haji 30 Hari..."
                                     />
                                 </div>
@@ -150,7 +143,7 @@ const PremiumInput = ({ label, icon: Icon, type = "text", value, onChange, place
                 type={type} 
                 value={value} 
                 onChange={(e) => onChange(e.target.value)} 
-                className="w-full text-sm font-semibold text-gray-700 bg-white/80 border border-gray-200 rounded-xl px-4 py-3 focus:bg-white focus:border-[#064E3B] focus:ring-4 focus:ring-[#064E3B]/5 outline-none transition-all shadow-sm placeholder:font-medium placeholder:text-gray-300 hover:border-gray-300" 
+                className="w-full text-sm font-semibold text-gray-700 bg-white/60 border border-gray-200 rounded-xl px-4 py-3.5 focus:bg-white focus:border-[#064E3B] focus:ring-4 focus:ring-[#064E3B]/5 outline-none transition-all shadow-sm placeholder:font-medium placeholder:text-gray-300 hover:border-gray-300 hover:bg-white/80" 
                 placeholder={placeholder} 
             />
         </div>
