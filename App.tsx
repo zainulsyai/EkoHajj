@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layout } from './components/Layout';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
@@ -61,6 +61,11 @@ const PlaceholderPage: React.FC<{ title: string; onNavigate: (page: Page) => voi
 const AppContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>(Page.LOGIN);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Automatically scroll to top when page changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [currentPage]);
 
   const handleLogin = () => {
     setIsAuthenticated(true);

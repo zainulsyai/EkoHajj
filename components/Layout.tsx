@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Sidebar } from './Sidebar';
-import { User, Bell, Search, AlignLeft } from 'lucide-react';
+import { User, Bell, AlignLeft } from 'lucide-react';
 import { Page } from '../types';
 
 interface LayoutProps {
@@ -11,7 +11,7 @@ interface LayoutProps {
 }
 
 export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigate, onLogout }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-[#F0F4F8] text-[#333333] font-sans overflow-x-hidden relative selection:bg-[#D4AF37]/30">
@@ -55,15 +55,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
 
           {/* Right: Actions */}
           <div className="flex items-center gap-6">
-            <div className="hidden md:flex items-center bg-white/50 hover:bg-white/80 rounded-xl px-4 py-2.5 border border-gray-200/60 focus-within:border-[#D4AF37]/50 focus-within:bg-white focus-within:shadow-md transition-all w-72">
-                <Search size={18} className="text-gray-400 mr-3" />
-                <input 
-                    type="text" 
-                    placeholder="Cari data..." 
-                    className="bg-transparent border-none outline-none text-sm text-gray-700 w-full placeholder-gray-400 font-medium"
-                />
-            </div>
-
+            
             <button className="relative p-2.5 bg-white/50 hover:bg-white rounded-xl border border-transparent hover:border-gray-200 text-gray-500 hover:text-[#064E3B] transition-all shadow-sm">
               <Bell size={20} />
               <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>

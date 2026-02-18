@@ -8,6 +8,10 @@ export interface BumbuRecord {
   otherIngredients: string;
   originProduct: string;
   productPrice: string;
+  // Metadata Identitas
+  kitchenName?: string;
+  surveyor?: string;
+  date?: string;
 }
 
 export interface RTERecord {
@@ -17,6 +21,10 @@ export interface RTERecord {
   isUsed: boolean;
   volume: string;
   price: string;
+  // Metadata Identitas
+  kitchenLocation?: string;
+  surveyor?: string;
+  date?: string;
 }
 
 export interface TenantRecord {
@@ -25,6 +33,10 @@ export interface TenantRecord {
   productType: string;
   bestSeller: string;
   rentCost: string;
+  // Metadata Identitas
+  hotelName?: string;
+  surveyor?: string;
+  date?: string;
 }
 
 export interface ExpeditionRecord {
@@ -32,12 +44,20 @@ export interface ExpeditionRecord {
   companyName: string;
   pricePerKg: string;
   weight: string;
+  // Metadata Identitas
+  hotelName?: string;
+  surveyor?: string;
+  date?: string;
 }
 
 export interface TelecomRecord {
   id: number;
   providerName: string;
   roamingPackage: string;
+  // Metadata Identitas
+  respondentName?: string;
+  kloter?: string;
+  surveyor?: string;
 }
 
 export enum Page {
