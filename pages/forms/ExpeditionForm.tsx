@@ -14,6 +14,7 @@ export const ExpeditionForm: React.FC<ExpeditionFormProps> = ({ onBack }) => {
   // Identity State
   const [hotelName, setHotelName] = useState(''); 
   const [location, setLocation] = useState(''); 
+  const [pic, setPic] = useState(''); 
   const [surveyor, setSurveyor] = useState(''); 
   const [surveyDate, setSurveyDate] = useState(''); 
   const [surveyTime, setSurveyTime] = useState(''); 
@@ -29,6 +30,29 @@ export const ExpeditionForm: React.FC<ExpeditionFormProps> = ({ onBack }) => {
 
   const handleRecordChange = (id: number, field: keyof ExpeditionRecord, value: string) => {
     setExpeditionData(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r));
+  };
+
+  // CONVERSION HELPERS
+  const getDateValue = (dateStr: string) => {
+      if (!dateStr) return '';
+      const [day, month, year] = dateStr.split('/');
+      return `${year}-${month}-${day}`;
+  };
+  const handleDateChange = (val: string) => {
+      if (!val) {
+          setSurveyDate('');
+          return;
+      }
+      const [year, month, day] = val.split('-');
+      setSurveyDate(`${day}/${month}/${year}`);
+  };
+
+  const getTimeValue = (timeStr: string) => {
+      if (!timeStr) return '';
+      return timeStr.replace('.', ':');
+  };
+  const handleTimeChange = (val: string) => {
+      setSurveyTime(val.replace(':', '.'));
   };
 
   // Calculate Average Income based on filled records (Mock calculation for display)
@@ -61,19 +85,20 @@ export const ExpeditionForm: React.FC<ExpeditionFormProps> = ({ onBack }) => {
          <div className="bg-white/40 backdrop-blur-md border border-white/60 rounded-3xl p-8 shadow-sm">
               <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200/50">
                 <div className="p-2 bg-[#064E3B]/10 rounded-xl"><FileText size={18} className="text-[#064E3B]" /></div>
-                <h3 className="text-sm font-bold text-gray-800 uppercase tracking-widest">A. Identitas Lokasi</h3>
+                <h3 className="text-sm font-bold text-gray-800 uppercase tracking-widest">A. Identitas Lokasi & Petugas</h3>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <PremiumInput label="1. Nama Hotel" icon={Building} value={hotelName} onChange={setHotelName} placeholder="Hotel..." />
-                  <PremiumInput label="2. Lokasi" icon={MapPin} value={location} onChange={setLocation} placeholder="Area..." />
-                  <PremiumInput label="3. Petugas Survei" icon={User} value={surveyor} onChange={setSurveyor} placeholder="Nama..." />
-                  <PremiumInput label="4. Tanggal Survei" icon={Calendar} type="date" value={surveyDate} onChange={setSurveyDate} />
-                  <PremiumInput label="5. Waktu Survei" icon={Clock} type="time" value={surveyTime} onChange={setSurveyTime} />
-                  <div className="flex items-end col-span-2 md:col-span-1 md:col-start-5">
-                      <button onClick={addRecord} className="w-full py-3.5 bg-white border border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-white rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow-lg hover:-translate-y-0.5">
-                        <Plus size={16} /> Tambah Kargo
-                      </button>
-                  </div>
+                  <PremiumInput label="2. Lokasi / Area" icon={MapPin} value={location} onChange={setLocation} placeholder="Area..." />
+                  <PremiumInput label="3. Penanggung Jawab" icon={User} value={pic} onChange={setPic} placeholder="PIC Kargo..." />
+                  <PremiumInput label="4. Tanggal Survei" icon={Calendar} type="date" value={getDateValue(surveyDate)} onChange={handleDateChange} />
+                  <PremiumInput label="5. Waktu Survei" icon={Clock} type="time" value={getTimeValue(surveyTime)} onChange={handleTimeChange} />
+                  <PremiumInput label="6. Petugas Survei" icon={User} value={surveyor} onChange={setSurveyor} placeholder="Nama Petugas..." />
+              </div>
+              <div className="mt-6 pt-4 border-t border-gray-200/50 flex justify-end">
+                  <button onClick={addRecord} className="px-6 py-3 bg-white border border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-white rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow-lg hover:-translate-y-0.5">
+                    <Plus size={16} /> Tambah Kargo
+                  </button>
               </div>
          </div>
       </div>
@@ -121,7 +146,7 @@ export const ExpeditionForm: React.FC<ExpeditionFormProps> = ({ onBack }) => {
             
              <button 
                 onClick={addRecord}
-                className="flex flex-col items-center justify-center min-h-[350px] rounded-3xl border-2 border-dashed border-gray-300 bg-white/40 hover:bg-white/80 hover:border-[#D4AF37] hover:shadow-xl transition-all duration-300 group"
+                className="flex flex-col items-center justify-center min-h-[350px] rounded-3xl border-2 border-dashed border-gray-300 bg-white/40 hover:bg-white/80 hover:border-[#064E3B] hover:shadow-xl transition-all duration-300 group"
             >
                 <div className="w-16 h-16 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 mb-4 group-hover:scale-110 group-hover:bg-[#D4AF37] group-hover:text-white group-hover:border-[#D4AF37] transition-all shadow-sm">
                     <Plus size={32} />

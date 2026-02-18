@@ -1,11 +1,89 @@
 import React, { useState } from 'react';
 import { Input, Toggle } from '../../components/InputFields';
-import { Save, Signal, ArrowLeft, Globe, User, Users, MapPin, Calendar, FileText } from 'lucide-react';
+import { Save, Signal, ArrowLeft, Globe, User, Users, MapPin, Calendar, FileText, Clock, Plus, Trash2 } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 
 interface TelecomFormProps {
     onBack: () => void;
 }
+
+// Component to render authentic brand logos
+const ProviderLogo = ({ name }: { name: string }) => {
+    const n = name.toLowerCase();
+    
+    // Telkomsel - Red Theme
+    if (n.includes('telkomsel')) {
+        return (
+            <div className="w-full h-full bg-[#EC1C24] flex items-center justify-center p-2">
+                 <svg viewBox="0 0 160 40" className="w-full h-auto fill-white">
+                     {/* Simplified Telkomsel Logotype */}
+                     <path d="M10,20 Q10,10 20,10 H140 Q150,10 150,20 Q150,30 140,30 H20 Q10,30 10,20 Z" opacity="0" />
+                     <text x="50%" y="28" fontSize="24" fontFamily="sans-serif" fontWeight="900" textAnchor="middle" letterSpacing="-1">Telkomsel</text>
+                 </svg>
+            </div>
+        );
+    }
+    // Indosat Ooredoo - Yellow Theme
+    if (n.includes('indosat')) {
+        return (
+             <div className="w-full h-full bg-[#FFD100] flex items-center justify-center p-2">
+                 <svg viewBox="0 0 140 40" className="w-full h-auto fill-black">
+                     <text x="50%" y="28" fontSize="24" fontFamily="sans-serif" fontWeight="800" textAnchor="middle" letterSpacing="-0.5">indosat</text>
+                 </svg>
+            </div>
+        );
+    }
+    // XL Axiata - Blue Theme
+    if (n.includes('xl')) {
+         return (
+             <div className="w-full h-full bg-[#002D72] flex items-center justify-center p-2 relative overflow-hidden">
+                 {/* Green corner accent */}
+                 <div className="absolute top-0 right-0 w-6 h-6 bg-[#8CC63F] -mr-3 -mt-3 transform rotate-45"></div>
+                 <svg viewBox="0 0 60 40" className="w-full h-auto fill-white">
+                     <text x="30" y="32" fontSize="36" fontFamily="sans-serif" fontWeight="900" textAnchor="middle">XL</text>
+                 </svg>
+            </div>
+        );
+    }
+    // Smartfren - White/Pink Theme
+    if (n.includes('smartfren')) {
+         return (
+             <div className="w-full h-full bg-white flex items-center justify-center p-2 border border-gray-100">
+                 <svg viewBox="0 0 140 40" className="w-full h-auto fill-[#E50059]">
+                     <text x="50%" y="26" fontSize="22" fontFamily="sans-serif" fontWeight="bold" textAnchor="middle" letterSpacing="-0.5">smartfren</text>
+                     <circle cx="50%" cy="34" r="2.5" fill="#E50059"/>
+                 </svg>
+            </div>
+        );
+    }
+    // Tri (3) - Black Theme
+    if (n.includes('tri') || n === '3') {
+         return (
+             <div className="w-full h-full bg-black flex items-center justify-center p-3">
+                 <svg viewBox="0 0 40 40" className="w-auto h-full fill-white">
+                      <path d="M12,8 H28 L20,18 L28,28 H12" stroke="white" strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                 </svg>
+            </div>
+        );
+    }
+    // AXIS - Purple Theme
+    if (n.includes('axis')) {
+         return (
+             <div className="w-full h-full bg-[#682079] flex items-center justify-center p-2">
+                 <svg viewBox="0 0 100 40" className="w-full h-auto fill-white">
+                     <text x="50%" y="30" fontSize="32" fontFamily="sans-serif" fontWeight="900" textAnchor="middle" letterSpacing="1">AXIS</text>
+                 </svg>
+            </div>
+        );
+    }
+
+    // Default Fallback
+    return (
+        <div className="w-full h-full bg-gray-600 flex items-center justify-center text-white text-xl font-bold">
+            {name.charAt(0)}
+        </div>
+    );
+};
 
 export const TelecomForm: React.FC<TelecomFormProps> = ({ onBack }) => {
   const { telecomData, setTelecomData, telecomActive, setTelecomActive } = useData();
@@ -16,7 +94,11 @@ export const TelecomForm: React.FC<TelecomFormProps> = ({ onBack }) => {
   const [embarkation, setEmbarkation] = useState(''); 
   const [province, setProvince] = useState(''); 
   const [surveyDate, setSurveyDate] = useState(''); 
+  const [surveyTime, setSurveyTime] = useState(''); 
   const [surveyor, setSurveyor] = useState(''); 
+  
+  // New Provider State
+  const [newProvider, setNewProvider] = useState('');
 
   const toggleProvider = (id: number) => {
     setTelecomActive(prev => ({...prev, [id]: !prev[id]}));
@@ -26,12 +108,56 @@ export const TelecomForm: React.FC<TelecomFormProps> = ({ onBack }) => {
     setTelecomData(prev => prev.map(p => p.id === id ? {...p, roamingPackage: val} : p));
   };
 
-  const getProviderTheme = (name: string) => {
-      // Branding colors for logo/icon only
-      if(name.includes('Telkomsel')) return { bg: 'bg-[#E30613]', text: 'text-[#E30613]' };
-      if(name.includes('Indosat')) return { bg: 'bg-[#FFD100]', text: 'text-yellow-600' };
-      if(name.includes('XL')) return { bg: 'bg-[#1D4F91]', text: 'text-[#1D4F91]' };
-      return { bg: 'bg-gray-600', text: 'text-gray-600' };
+  const handleAddProvider = () => {
+    if (!newProvider.trim()) return;
+    const newId = telecomData.length > 0 ? Math.max(...telecomData.map(p => p.id)) + 1 : 1;
+    setTelecomData([...telecomData, {
+        id: newId,
+        providerName: newProvider,
+        roamingPackage: '',
+        respondentName: respondentName,
+        kloter: kloter, 
+        embarkation: embarkation, 
+        province: province, 
+        surveyor: surveyor, 
+        date: surveyDate, 
+        time: surveyTime
+    }]);
+    setNewProvider('');
+    // Automatically activate the new provider
+    setTelecomActive(prev => ({...prev, [newId]: true}));
+  };
+
+  const handleDeleteProvider = (id: number) => {
+    setTelecomData(prev => prev.filter(p => p.id !== id));
+    setTelecomActive(prev => {
+        const newState = { ...prev };
+        delete newState[id];
+        return newState;
+    });
+  };
+
+  // CONVERSION HELPERS
+  const getDateValue = (dateStr: string) => {
+      if (!dateStr) return '';
+      const [day, month, year] = dateStr.split('/');
+      return `${year}-${month}-${day}`;
+  };
+  const handleDateChange = (val: string) => {
+      if (!val) {
+          setSurveyDate('');
+          return;
+      }
+      const [year, month, day] = val.split('-');
+      setSurveyDate(`${day}/${month}/${year}`);
+  };
+
+  const getTimeValue = (timeStr: string) => {
+      if (!timeStr) return '';
+      return timeStr.replace('.', ':');
+  };
+  const handleTimeChange = (val: string) => {
+      setSurveyTime(val.replace(':', '.'));
   };
 
   return (
@@ -62,26 +188,32 @@ export const TelecomForm: React.FC<TelecomFormProps> = ({ onBack }) => {
          <div className="bg-white/40 backdrop-blur-md border border-white/60 rounded-3xl p-8 shadow-sm">
               <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200/50">
                 <div className="p-2 bg-[#064E3B]/10 rounded-xl"><FileText size={18} className="text-[#064E3B]" /></div>
-                <h3 className="text-sm font-bold text-gray-800 uppercase tracking-widest">A. Identitas Responden</h3>
+                <h3 className="text-sm font-bold text-gray-800 uppercase tracking-widest">A. Identitas Responden & Petugas</h3>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-6 gap-6">
-                  <div className="md:col-span-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="lg:col-span-1">
                       <PremiumInput label="1. Nama Responden" icon={User} value={respondentName} onChange={setRespondentName} placeholder="Nama Jemaah..." />
                   </div>
-                  <PremiumInput label="2. Kloter" icon={Users} value={kloter} onChange={setKloter} placeholder="Kloter..." />
-                  <PremiumInput label="3. Embarkasi" icon={MapPin} value={embarkation} onChange={setEmbarkation} placeholder="Kota..." />
+                  <div className="flex gap-4">
+                     <div className="w-1/2">
+                        <PremiumInput label="2. Kloter" icon={Users} value={kloter} onChange={setKloter} placeholder="Kloter..." />
+                     </div>
+                     <div className="w-1/2">
+                        <PremiumInput label="3. Embarkasi" icon={MapPin} value={embarkation} onChange={setEmbarkation} placeholder="Kota..." />
+                     </div>
+                  </div>
                   <PremiumInput label="4. Provinsi" icon={MapPin} value={province} onChange={setProvince} placeholder="Prov..." />
-                  <PremiumInput label="5. Tanggal Survei" icon={Calendar} type="date" value={surveyDate} onChange={setSurveyDate} />
-                  <PremiumInput label="6. Surveyor" icon={User} value={surveyor} onChange={setSurveyor} placeholder="Nama Surveyor..." />
+                  <PremiumInput label="5. Tanggal Survei" icon={Calendar} type="date" value={getDateValue(surveyDate)} onChange={handleDateChange} />
+                  <PremiumInput label="6. Waktu Survei" icon={Clock} type="time" value={getTimeValue(surveyTime)} onChange={handleTimeChange} />
+                  <PremiumInput label="7. Petugas Survei" icon={User} value={surveyor} onChange={setSurveyor} placeholder="Nama Petugas..." />
               </div>
          </div>
       </div>
 
       {/* GRID CONTENT */}
       <div className="p-8 z-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-10">
             {telecomData.map((prov) => {
-                const theme = getProviderTheme(prov.providerName);
                 const isActive = telecomActive[prov.id];
 
                 return (
@@ -92,33 +224,49 @@ export const TelecomForm: React.FC<TelecomFormProps> = ({ onBack }) => {
                             ? `bg-white shadow-[0_10px_30px_rgba(6,78,59,0.1)] ring-2 ring-[#064E3B]/30` 
                             : 'bg-white/30 border border-white hover:bg-white hover:shadow-lg opacity-80 hover:opacity-100'}`}
                     >
-                       <div className="p-8 flex-1 flex flex-col">
-                           <div className="flex justify-between items-start mb-8">
-                               {/* Brand Icon stays branded for recognition, but frame is uniform */}
-                               <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-3xl font-bold shadow-lg shadow-gray-200 ${theme.bg} ${prov.providerName.includes('Indosat') ? 'text-black' : 'text-white'}`}>
-                                    {prov.providerName.charAt(0)}
+                       <div className="p-6 flex-1 flex flex-col">
+                           {/* Header Row: Logo + Text + Toggle */}
+                           <div className="flex items-center gap-4 mb-6">
+                               {/* Brand Icon - Left Side */}
+                               <div className="w-20 h-12 rounded-xl overflow-hidden shadow-md shadow-gray-200/50 border border-gray-100 shrink-0 relative">
+                                    <ProviderLogo name={prov.providerName} />
                                </div>
-                               <Toggle checked={!!isActive} onChange={() => toggleProvider(prov.id)} />
-                           </div>
+                               
+                               {/* Text Info - Middle */}
+                               <div className="flex-1 min-w-0">
+                                   <h3 className={`text-lg font-bold font-playfair leading-tight truncate ${isActive ? 'text-gray-900' : 'text-gray-500'}`}>
+                                       {prov.providerName}
+                                   </h3>
+                                   <p className={`text-[10px] font-bold uppercase tracking-widest mt-0.5 ${isActive ? 'text-[#064E3B]' : 'text-gray-400'}`}>
+                                       {isActive ? 'Aktif' : 'Non-Aktif'}
+                                   </p>
+                               </div>
 
-                           <div className="mb-6">
-                               <h3 className={`text-2xl font-bold font-playfair mb-1 transition-colors ${isActive ? 'text-gray-900' : 'text-gray-500'}`}>
-                                   {prov.providerName}
-                               </h3>
-                               <p className={`text-[10px] font-bold uppercase tracking-widest ${isActive ? 'text-[#064E3B]' : 'text-gray-400'}`}>
-                                   {isActive ? 'Provider Aktif' : 'Tidak Dipilih'}
-                               </p>
+                               {/* Toggle & Actions - Right */}
+                               <div className="shrink-0 flex items-center gap-2">
+                                   {prov.id > 6 && (
+                                       <button 
+                                           onClick={() => handleDeleteProvider(prov.id)}
+                                           className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                           title="Hapus Provider"
+                                       >
+                                           <Trash2 size={18} />
+                                       </button>
+                                   )}
+                                   <Toggle checked={!!isActive} onChange={() => toggleProvider(prov.id)} />
+                               </div>
                            </div>
                            
+                           {/* Collapsible Content */}
                            <div className={`transition-all duration-500 ease-in-out ${isActive ? 'opacity-100 max-h-40' : 'opacity-30 max-h-0 overflow-hidden'}`}>
-                                <div className="space-y-2">
+                                <div className="space-y-2 pt-2 border-t border-dashed border-gray-200">
                                     <label className={`text-[10px] font-bold uppercase flex items-center gap-1.5 ${isActive ? 'text-[#064E3B]' : 'text-gray-400'}`}>
                                         <Globe size={12} /> Paket Roaming
                                     </label>
                                     <Input 
                                         value={prov.roamingPackage} 
                                         onChange={(e) => updatePackage(prov.id, e.target.value)} 
-                                        className={`!py-3.5 !px-4 !text-sm !bg-gray-50/50 focus:!bg-white !border-gray-200 focus:!border-[#064E3B] !rounded-xl !font-medium`} 
+                                        className={`!py-3 !px-4 !text-sm !bg-gray-50/50 focus:!bg-white !border-gray-200 focus:!border-[#064E3B] !rounded-xl !font-medium`} 
                                         placeholder="Contoh: Paket Haji 30 Hari..."
                                     />
                                 </div>
@@ -127,6 +275,32 @@ export const TelecomForm: React.FC<TelecomFormProps> = ({ onBack }) => {
                     </div>
                 );
             })}
+
+            {/* Add Provider Card */}
+            <div className="relative rounded-3xl border-2 border-dashed border-gray-300 bg-white/40 hover:bg-white/60 transition-all flex flex-col items-center justify-center p-8 text-center group min-h-[220px]">
+                <div className="w-14 h-14 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 mb-3 group-hover:scale-110 group-hover:bg-[#064E3B] group-hover:text-white transition-all shadow-sm">
+                    <Plus size={28} />
+                </div>
+                <h3 className="text-base font-bold text-gray-600 mb-3">Tambah Provider</h3>
+                <div className="w-full max-w-[200px] space-y-2">
+                    <input 
+                        type="text" 
+                        value={newProvider}
+                        onChange={(e) => setNewProvider(e.target.value.replace(/\b\w/g, l => l.toUpperCase()))}
+                        placeholder="Nama Provider..."
+                        className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs focus:border-[#064E3B] focus:ring-2 focus:ring-[#064E3B]/10 outline-none text-center"
+                        onKeyDown={(e) => e.key === 'Enter' && handleAddProvider()}
+                    />
+                    <button 
+                        onClick={handleAddProvider}
+                        disabled={!newProvider.trim()}
+                        className="w-full py-2 bg-[#064E3B] text-white rounded-lg text-xs font-bold hover:bg-[#053d2e] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    >
+                        Tambah
+                    </button>
+                </div>
+            </div>
+
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { BumbuRecord, RTERecord, TenantRecord, ExpeditionRecord, TelecomRecord } from '../types';
 
 interface DataContextType {
@@ -16,6 +16,7 @@ interface DataContextType {
   setTelecomData: React.Dispatch<React.SetStateAction<TelecomRecord[]>>;
   telecomActive: Record<number, boolean>;
   setTelecomActive: React.Dispatch<React.SetStateAction<Record<number, boolean>>>;
+  isLoading: boolean;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -30,53 +31,129 @@ const initialBumbuNames = [
   'Bumbu Kuning', 'Bumbu Dabu-Dabu', 'Bumbu Pesmol', 'Bumbu Habang'
 ];
 
-// Helper to generate realistic looking data
-const generateBumbu = (prices: number[], location: string) => initialBumbuNames.map((name, index) => ({
-    id: index,
-    name,
-    isUsed: index < 6, // Mock initial used
-    volume: index < 6 ? (Math.random() * 100).toFixed(2) : '',
-    price: index < 6 ? (prices[index % prices.length]).toString() : '',
-    otherIngredients: '',
-    originProduct: index % 3 === 0 ? 'Indofood' : 'Lokal Arab',
-    productPrice: '',
-    // Metadata
-    kitchenName: location === 'Makkah' ? 'Dapur Al-Haram Sektor 1' : 'Dapur Madinah Al-Munawwarah',
-    surveyor: index % 2 === 0 ? 'Ahmad Faisal' : 'Budi Santoso',
-    date: '2026-06-15'
-}));
+// Helper to generate data with ONLY ONE example (index 0)
+const generateBumbu = (location: string) => initialBumbuNames.map((name, index) => {
+    const isExample = index === 0; // Only the first item has data
+    
+    return {
+        id: index,
+        name,
+        isUsed: isExample, 
+        volume: isExample ? '10.5' : '',
+        price: isExample ? '2500' : '',
+        otherIngredients: '',
+        originProduct: isExample ? 'Indofood' : '',
+        productPrice: isExample ? '150' : '',
+        // Metadata - Filled only for the example to show format
+        companyName: isExample ? (location === 'Makkah' ? 'PT. Catering Makkah Sejahtera' : 'CV. Madinah Berkah') : '',
+        kitchenName: isExample ? (location === 'Makkah' ? 'Dapur Al-Haram Sektor 1' : 'Dapur Madinah Al-Munawwarah') : '',
+        address: isExample ? (location === 'Makkah' ? 'Jl. King Abdul Aziz No. 12' : 'Jl. King Fahd No. 88') : '',
+        pic: isExample ? (location === 'Makkah' ? 'Abdullah' : 'Yusuf') : '',
+        surveyor: isExample ? 'Ahmad Faisal' : '',
+        date: isExample ? '15/06/2026' : '',
+        time: isExample ? '09.00' : ''
+    };
+});
 
 export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Initial Data Mocking to avoid empty dashboard on first load
-  const [bumbuMakkah, setBumbuMakkah] = useState<BumbuRecord[]>(generateBumbu([1500, 2000, 2500, 1800, 1200], 'Makkah'));
-  const [bumbuMadinah, setBumbuMadinah] = useState<BumbuRecord[]>(generateBumbu([1400, 1800, 2300, 1750, 1100], 'Madinah'));
-  
-  const [rteData, setRteData] = useState<RTERecord[]>([
-      { id: 1, companyName: 'PT. Halalan Thayyiban Indonesia', spiceType: 'Rendang Daging', isUsed: true, volume: '15000', price: '25000', kitchenLocation: 'Sektor 3 Makkah', surveyor: 'Siti Aminah', date: '2026-06-14' },
-      { id: 2, companyName: 'PT. Umara', spiceType: 'Ayam Kecap', isUsed: true, volume: '12000', price: '22000', kitchenLocation: 'Sektor 5 Makkah', surveyor: 'Rudi Hartono', date: '2026-06-14' },
-      { id: 3, companyName: 'Foodex', spiceType: 'Daging Lada Hitam', isUsed: true, volume: '8000', price: '24000', kitchenLocation: 'Madinah Zone A', surveyor: 'Ahmad Faisal', date: '2026-06-15' },
-  ]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const [tenantData, setTenantData] = useState<TenantRecord[]>([
-    { id: 1, shopName: 'Toko Al-Barakah', productType: 'Oleh-oleh', bestSeller: 'Kurma Ajwa', rentCost: '15000', hotelName: 'Hotel Al-Kiswah', surveyor: 'Dewi Sartika', date: '2026-06-10' },
-    { id: 2, shopName: 'Bin Dawood Express', productType: 'Retail', bestSeller: 'Coklat', rentCost: '45000', hotelName: 'Hotel Royal Clock', surveyor: 'Budi Santoso', date: '2026-06-11' },
-    { id: 3, shopName: 'Resto Nusantara', productType: 'Makanan', bestSeller: 'Bakso', rentCost: '20000', hotelName: 'Hotel Rawda', surveyor: 'Rudi Hartono', date: '2026-06-12' },
-  ]);
+  // Initial Data Mocking
+  const [bumbuMakkah, setBumbuMakkah] = useState<BumbuRecord[]>([]);
+  const [bumbuMadinah, setBumbuMadinah] = useState<BumbuRecord[]>([]);
+  const [rteData, setRteData] = useState<RTERecord[]>([]);
+  const [tenantData, setTenantData] = useState<TenantRecord[]>([]);
+  const [expeditionData, setExpeditionData] = useState<ExpeditionRecord[]>([]);
+  const [telecomData, setTelecomData] = useState<TelecomRecord[]>([]);
+  const [telecomActive, setTelecomActive] = useState<Record<number, boolean>>({});
 
-  const [expeditionData, setExpeditionData] = useState<ExpeditionRecord[]>([
-    { id: 1, companyName: 'Garuda Cargo', pricePerKg: '25', weight: '2400', hotelName: 'Hotel 101', surveyor: 'Ahmad Faisal', date: '2026-06-13' },
-    { id: 2, companyName: 'Saudia Cargo', pricePerKg: '22', weight: '3200', hotelName: 'Hotel 202', surveyor: 'Siti Aminah', date: '2026-06-13' },
-    { id: 3, companyName: 'Pos Indonesia', pricePerKg: '18', weight: '1500', hotelName: 'Hotel 303', surveyor: 'Dewi Sartika', date: '2026-06-14' },
-  ]);
+  useEffect(() => {
+    // Simulate API fetch delay
+    const timer = setTimeout(() => {
+        // 1. Bumbu: List all names, but only fill the first one
+        setBumbuMakkah(generateBumbu('Makkah'));
+        setBumbuMadinah(generateBumbu('Madinah'));
 
-  const [telecomData, setTelecomData] = useState<TelecomRecord[]>([
-    { id: 1, providerName: 'Telkomsel', roamingPackage: 'Paket Haji 30 Hari', respondentName: 'H. Abdullah', kloter: 'JKG-01', surveyor: 'Budi Santoso' },
-    { id: 2, providerName: 'Indosat Ooredoo', roamingPackage: 'Paket Umrah Plus', respondentName: 'Hj. Fatimah', kloter: 'SUB-12', surveyor: 'Siti Aminah' },
-    { id: 3, providerName: 'XL Axiata', roamingPackage: '', respondentName: '', kloter: '', surveyor: '' },
-    { id: 4, providerName: 'Lainnya', roamingPackage: '', respondentName: '', kloter: '', surveyor: '' },
-  ]);
-  
-  const [telecomActive, setTelecomActive] = useState<Record<number, boolean>>({1: true, 2: true, 3: false, 4: false});
+        // 2. RTE: Single Example
+        setRteData([
+            { 
+                id: 1, 
+                companyName: 'PT. Halalan Thayyiban Indonesia', 
+                spiceType: 'Rendang Daging', 
+                isUsed: true, 
+                volume: '15000', 
+                price: '25000', 
+                kitchenName: 'Dapur Sektor 3', 
+                address: 'Aziziah South', 
+                pic: 'Mr. Hamzah', 
+                surveyor: 'Siti Aminah', 
+                date: '14/06/2026', 
+                time: '14.30' 
+            }
+        ]);
+
+        // 3. Tenant: Single Example
+        setTenantData([
+            { 
+                id: 1, 
+                shopName: 'Toko Al-Barakah', 
+                productType: 'Oleh-oleh', 
+                bestSeller: 'Kurma Ajwa', 
+                rentCost: '15000', 
+                hotelName: 'Hotel Al-Kiswah', 
+                location: 'Lobby Tower 1', 
+                pic: 'Ahmed', 
+                surveyor: 'Dewi Sartika', 
+                date: '10/06/2026', 
+                time: '16.00' 
+            }
+        ]);
+
+        // 4. Expedition: Single Example
+        setExpeditionData([
+            { 
+                id: 1, 
+                companyName: 'Garuda Cargo', 
+                pricePerKg: '25', 
+                weight: '2400', 
+                hotelName: 'Hotel 101', 
+                location: 'Lobby Area', 
+                pic: 'Bambang', 
+                surveyor: 'Ahmad Faisal', 
+                date: '13/06/2026', 
+                time: '09.00' 
+            }
+        ]);
+
+        // 5. Telecom: List Providers, but only fill details for the first one
+        const providers = [
+            'Telkomsel', 'Indosat Ooredoo', 'XL Axiata', 'Smartfren', 'Tri (3)', 'AXIS'
+        ];
+        
+        const initialTelecoms = providers.map((name, idx) => {
+            const isExample = idx === 0;
+            return {
+                id: idx + 1,
+                providerName: name,
+                roamingPackage: isExample ? 'Paket Haji 30 Hari' : '',
+                respondentName: isExample ? 'H. Abdullah' : '',
+                kloter: isExample ? 'JKG-01' : '',
+                embarkation: isExample ? 'Jakarta' : '',
+                province: isExample ? 'DKI Jakarta' : '',
+                surveyor: isExample ? 'Budi Santoso' : '',
+                date: '14/06/2026', 
+                time: '08.15' 
+            };
+        });
+
+        setTelecomData(initialTelecoms);
+        setTelecomActive({ 1: true }); // Only first one active
+        
+        setIsLoading(false);
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <DataContext.Provider value={{
@@ -86,7 +163,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       tenantData, setTenantData,
       expeditionData, setExpeditionData,
       telecomData, setTelecomData,
-      telecomActive, setTelecomActive
+      telecomActive, setTelecomActive,
+      isLoading
     }}>
       {children}
     </DataContext.Provider>

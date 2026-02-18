@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Page } from '../types';
-import { ChefHat, UtensilsCrossed, Store, Truck, Signal, ArrowRight, Activity, CheckCircle2, Clock, AlertCircle, FileEdit, History, Search, X, ChevronRight, Calendar } from 'lucide-react';
+import { ChefHat, UtensilsCrossed, Store, Truck, Signal, ArrowRight, Activity, CheckCircle2, Clock, AlertCircle, FileEdit, History, Search, X, ChevronRight, Calendar, Sparkles } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
 
 interface DataEntryPortalProps {
@@ -9,26 +9,15 @@ interface DataEntryPortalProps {
 
 const portalItems = [
     {
-        id: 'makkah',
-        title: "Bumbu Pasta Makkah",
-        subtitle: "Dapur Wilayah Makkah",
-        description: "Input penggunaan bumbu & harga.",
+        id: 'bumbu',
+        title: "Bumbu Pasta",
+        subtitle: "Makkah & Madinah",
+        description: "Input penggunaan bumbu, harga, dan perusahaan penyedia untuk kedua wilayah.",
         icon: ChefHat,
-        targetPage: Page.FORM_BUMBU_MAKKAH,
-        status: 'completed',
-        progress: 100,
-        lastUpdate: '2 jam lalu'
-    },
-    {
-        id: 'madinah',
-        title: "Bumbu Pasta Madinah",
-        subtitle: "Dapur Wilayah Madinah",
-        description: "Input penggunaan bumbu & harga.",
-        icon: ChefHat,
-        targetPage: Page.FORM_BUMBU_MADINAH,
+        targetPage: Page.FORM_BUMBU,
         status: 'draft',
-        progress: 45,
-        lastUpdate: '1 hari lalu'
+        progress: 75,
+        lastUpdate: 'Baru saja'
     },
     {
         id: 'rte',
@@ -91,14 +80,14 @@ export const DataEntryPortal: React.FC<DataEntryPortalProps> = ({ onNavigate }) 
         // Search Bumbu Makkah
         bumbuMakkah.forEach(item => {
             if (item.name.toLowerCase().includes(lowerTerm)) {
-                results.push({ type: 'Bumbu Makkah', title: item.name, subtitle: `Vol: ${item.volume || 0} | Harga: ${item.price || 0}`, icon: ChefHat, page: Page.FORM_BUMBU_MAKKAH });
+                results.push({ type: 'Bumbu Makkah', title: item.name, subtitle: `Vol: ${item.volume || 0} | Harga: ${item.price || 0}`, icon: ChefHat, page: Page.FORM_BUMBU });
             }
         });
 
         // Search Bumbu Madinah
         bumbuMadinah.forEach(item => {
             if (item.name.toLowerCase().includes(lowerTerm)) {
-                results.push({ type: 'Bumbu Madinah', title: item.name, subtitle: `Vol: ${item.volume || 0} | Harga: ${item.price || 0}`, icon: ChefHat, page: Page.FORM_BUMBU_MADINAH });
+                results.push({ type: 'Bumbu Madinah', title: item.name, subtitle: `Vol: ${item.volume || 0} | Harga: ${item.price || 0}`, icon: ChefHat, page: Page.FORM_BUMBU });
             }
         });
 
@@ -256,10 +245,10 @@ export const DataEntryPortal: React.FC<DataEntryPortalProps> = ({ onNavigate }) 
                 <>
                     <div className="flex items-center gap-4 px-2 pt-4">
                         <h2 className="text-xl font-bold text-[#064E3B] flex items-center gap-3 font-playfair">
-                            <span className="w-1.5 h-8 bg-[#D4AF37] rounded-full"></span>
+                            <span className="w-1.5 h-8 bg-[#D4AF37] rounded-full shadow-sm"></span>
                             Kategori Formulir
                         </h2>
-                        <div className="h-px bg-gradient-to-r from-gray-200 to-transparent flex-1"></div>
+                        <div className="h-px bg-gradient-to-r from-[#064E3B]/10 to-transparent flex-1"></div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -267,66 +256,79 @@ export const DataEntryPortal: React.FC<DataEntryPortalProps> = ({ onNavigate }) 
                             <button 
                                 key={item.id}
                                 onClick={() => onNavigate(item.targetPage)}
-                                className="group relative flex flex-col text-left h-full w-full bg-white/60 backdrop-blur-xl border border-white/60 rounded-[2.5rem] shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_40px_-5px_rgba(6,78,59,0.1)] hover:border-[#064E3B]/20 hover:bg-white/80 transition-all duration-300 hover:-translate-y-1 overflow-hidden"
+                                className="group relative flex flex-col text-left h-full w-full bg-gradient-to-br from-white/80 via-white/60 to-white/40 backdrop-blur-xl border border-white/60 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(6,78,59,0.15)] hover:border-white/90 transition-all duration-500 hover:-translate-y-1 overflow-hidden"
                             >
-                                {/* Card Glow Effect */}
-                                <div className="absolute -right-10 -top-10 w-40 h-40 bg-gradient-to-br from-[#064E3B]/5 to-transparent rounded-full blur-2xl group-hover:bg-[#D4AF37]/10 transition-colors duration-500"></div>
+                                {/* Active Selection Border Effect */}
+                                <div className="absolute inset-0 border-2 border-transparent group-hover:border-[#D4AF37]/20 rounded-[2rem] transition-colors duration-500 pointer-events-none z-20"></div>
 
-                                <div className="p-8 flex-1 flex flex-col w-full relative z-10">
-                                    {/* Header: Icon & Subtitle */}
+                                {/* Background Accents */}
+                                <div className="absolute -right-20 -top-20 w-60 h-60 bg-gradient-to-br from-[#064E3B]/5 to-transparent rounded-full blur-3xl group-hover:bg-[#D4AF37]/10 transition-colors duration-700"></div>
+                                
+                                <div className="p-7 flex-1 flex flex-col w-full relative z-10">
+                                    
+                                    {/* Top Row: Icon & Status */}
                                     <div className="flex justify-between items-start mb-6">
-                                        <div className="p-4 rounded-2xl text-white shadow-lg shadow-[#064E3B]/10 bg-gradient-to-br from-[#064E3B] to-[#042f24] group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
-                                            <item.icon size={28} strokeWidth={1.5} />
+                                        <div className="relative">
+                                            <div className="absolute inset-0 bg-[#D4AF37] blur-lg opacity-0 group-hover:opacity-30 transition-opacity duration-500 rounded-2xl"></div>
+                                            <div className="relative w-14 h-14 flex items-center justify-center rounded-2xl bg-gradient-to-br from-[#064E3B] to-[#042f24] text-white shadow-xl shadow-[#064E3B]/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 ease-out border border-white/10">
+                                                <item.icon size={26} strokeWidth={1.5} />
+                                            </div>
                                         </div>
                                         
-                                        {/* Dynamic Status Pill */}
-                                        <div className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 border backdrop-blur-sm shadow-sm
-                                            ${item.status === 'completed' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 
-                                            item.status === 'draft' ? 'bg-amber-50 text-amber-700 border-amber-100' : 
-                                            'bg-gray-50 text-gray-400 border-gray-100'}`}>
+                                        <div className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 border backdrop-blur-sm shadow-sm transition-all duration-300
+                                            ${item.status === 'completed' ? 'bg-emerald-50 text-emerald-700 border-emerald-100 group-hover:bg-emerald-100' : 
+                                            item.status === 'draft' ? 'bg-amber-50 text-amber-700 border-amber-100 group-hover:bg-amber-100' : 
+                                            'bg-gray-50 text-gray-400 border-gray-100 group-hover:bg-gray-100'}`}>
                                             {item.status === 'completed' && <CheckCircle2 size={12} />}
                                             {item.status === 'draft' && <History size={12} />}
-                                            {item.status === 'pending' && <AlertCircle size={12} />}
+                                            {item.status === 'pending' && <Activity size={12} />}
                                             <span>{item.status === 'completed' ? 'Selesai' : item.status === 'draft' ? 'Draft' : 'Belum'}</span>
                                         </div>
                                     </div>
 
-                                    <div className="mb-3 mt-2">
-                                        <span className="text-[10px] font-bold text-[#D4AF37] uppercase tracking-widest block mb-2">{item.subtitle}</span>
-                                        <h3 className="text-2xl font-bold text-gray-800 group-hover:text-[#064E3B] transition-colors leading-tight font-playfair">
+                                    {/* Content */}
+                                    <div className="mb-2">
+                                        <div className="flex items-center gap-2 mb-1.5 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 ease-out">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]"></span>
+                                            <span className="text-[10px] font-bold text-[#D4AF37] uppercase tracking-widest">{item.subtitle}</span>
+                                        </div>
+                                        <h3 className="text-2xl font-bold text-gray-800 group-hover:text-[#064E3B] transition-colors leading-tight font-playfair tracking-tight">
                                             {item.title}
                                         </h3>
                                     </div>
                                     
-                                    <p className="text-sm text-gray-500 font-medium leading-relaxed mb-8 line-clamp-2">
+                                    <p className="text-sm text-gray-500 font-medium leading-relaxed mb-8 line-clamp-2 border-l-2 border-transparent pl-0 group-hover:border-[#D4AF37]/30 group-hover:pl-3 transition-all duration-300">
                                         {item.description}
                                     </p>
 
-                                    {/* Progress Section */}
-                                    <div className="mt-auto">
-                                        <div className="flex justify-between text-[10px] text-gray-400 font-bold mb-2 uppercase tracking-wide">
-                                            <span>Kelengkapan Data</span>
-                                            <span className="text-gray-600">{item.progress}%</span>
-                                        </div>
-                                        <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden border border-gray-100/50">
-                                            <div className="h-full rounded-full transition-all duration-1000 ease-out relative overflow-hidden bg-gradient-to-r from-[#064E3B] to-[#10B981]" 
-                                                style={{ width: `${item.progress}%` }}>
-                                                <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+                                    {/* Footer Section: Progress */}
+                                    <div className="mt-auto relative">
+                                        <div className="flex justify-between items-end mb-2">
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">Kelengkapan Data</span>
+                                                <div className="flex items-center gap-1.5 text-[10px] text-gray-400 font-medium mt-0.5">
+                                                    <Clock size={10} />
+                                                    <span>Update: {item.lastUpdate}</span>
+                                                </div>
                                             </div>
+                                            <span className={`text-sm font-bold ${item.progress === 100 ? 'text-[#064E3B]' : 'text-gray-600'}`}>{item.progress}%</span>
                                         </div>
-                                        <div className="mt-3 flex items-center gap-1.5 text-[10px] text-gray-400 font-medium">
-                                            <Clock size={12} />
-                                            <span>Updated: {item.lastUpdate}</span>
+                                        
+                                        <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden border border-gray-100/50">
+                                            <div className={`h-full rounded-full transition-all duration-1000 ease-out relative overflow-hidden ${item.progress === 100 ? 'bg-gradient-to-r from-[#064E3B] to-[#10B981]' : 'bg-gradient-to-r from-[#D4AF37] to-[#FBBF24]'}`} 
+                                                style={{ width: `${item.progress}%` }}>
+                                                <div className="absolute inset-0 bg-white/30 animate-[shimmer_2s_infinite]"></div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Hover Overlay Button */}
-                                <div className="absolute inset-0 flex items-center justify-center bg-white/40 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
-                                    <div className="flex items-center gap-3 text-sm font-bold text-white bg-[#064E3B] px-8 py-3.5 rounded-2xl shadow-2xl shadow-[#064E3B]/30 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 hover:bg-[#053d2e]">
-                                        <span>Buka Formulir</span>
-                                        <ArrowRight size={16} />
-                                    </div>
+                                {/* Bottom Action Strip (Visible on Hover) */}
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#064E3B] via-[#10B981] to-[#D4AF37] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
+
+                                {/* Floating Action Button */}
+                                <div className="absolute bottom-6 right-6 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center text-[#064E3B] opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 delay-75 z-20 border border-gray-100">
+                                    <ChevronRight size={20} className="ml-0.5" />
                                 </div>
                             </button>
                         ))}

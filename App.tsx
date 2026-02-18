@@ -89,10 +89,8 @@ const AppContent: React.FC = () => {
         return <Reports />;
       case Page.VISUALIZATION:
         return <Visualization />;
-      case Page.FORM_BUMBU_MAKKAH:
-        return <SpiceForm location="Makkah" onBack={navigateToPortal} />;
-      case Page.FORM_BUMBU_MADINAH:
-        return <SpiceForm location="Madinah" onBack={navigateToPortal} />;
+      case Page.FORM_BUMBU:
+        return <SpiceForm onBack={navigateToPortal} />;
       case Page.FORM_RTE:
         return <RTEForm onBack={navigateToPortal} />;
       case Page.FORM_TENANT:

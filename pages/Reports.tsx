@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { GlassCard } from '../components/GlassCard';
-import { ChefHat, UtensilsCrossed, Truck, Store, Signal, Download, Printer, Filter, Search, FileBarChart, MapPin, User, Calendar } from 'lucide-react';
+import { ChefHat, UtensilsCrossed, Truck, Store, Signal, Download, Printer, Filter, Search, MapPin, User, Calendar, Clock, Building, Globe } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
+import { TableRowSkeleton } from '../components/Skeletons';
 
 const TableHeader = ({ children }: React.PropsWithChildren<{}>) => (
-  <th className="px-6 py-4 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">{children}</th>
+  <th className="px-6 py-4 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">{children}</th>
 );
 
 const TableRow = ({ children, idx }: React.PropsWithChildren<{ idx: number }>) => (
@@ -15,10 +16,18 @@ const TableRow = ({ children, idx }: React.PropsWithChildren<{ idx: number }>) =
 
 export const Reports: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'bumbu' | 'rte' | 'tenant' | 'ekspedisi' | 'telco'>('bumbu');
-  const { bumbuMakkah, bumbuMadinah, rteData, tenantData, expeditionData, telecomData, telecomActive } = useData();
+  const { bumbuMakkah, bumbuMadinah, rteData, tenantData, expeditionData, telecomData, telecomActive, isLoading } = useData();
   const currentDate = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
-  const renderTable = () => {
+  const renderTableBody = () => {
+      if (isLoading) {
+          return (
+              <tbody className="divide-y divide-gray-100">
+                  {[...Array(6)].map((_, i) => <TableRowSkeleton key={i} />)}
+              </tbody>
+          );
+      }
+
       switch(activeTab) {
           case 'bumbu':
               const allBumbu = [
@@ -26,176 +35,249 @@ export const Reports: React.FC = () => {
                   ...bumbuMadinah.filter(i => i.isUsed).map(i => ({ ...i, loc: 'Madinah' }))
               ];
               return (
-                  <div className="overflow-hidden rounded-2xl border border-gray-200/50">
-                    <table className="w-full text-sm">
-                        <thead className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-200">
-                            <tr>
-                                <TableHeader>Jenis Bumbu</TableHeader>
-                                <TableHeader>Detail Lokasi</TableHeader>
-                                <TableHeader>Volume (Ton)</TableHeader>
-                                <TableHeader>Harga (SAR)</TableHeader>
-                                <TableHeader>Surveyor & Tanggal</TableHeader>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                            {allBumbu.map((row, idx) => (
-                                <TableRow key={idx} idx={idx}>
-                                    <td className="px-6 py-4">
-                                        <div className="font-bold text-gray-700">{row.name}</div>
-                                        <div className="text-[10px] text-gray-400 font-medium">{row.originProduct}</div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-1.5 text-xs font-bold text-[#064E3B]">
-                                            <MapPin size={12} /> {row.loc}
-                                        </div>
-                                        <div className="text-[11px] text-gray-500">{row.kitchenName || 'Dapur Sektor'}</div>
-                                    </td>
-                                    <td className="px-6 py-4 text-gray-600 font-medium">{row.volume}</td>
-                                    <td className="px-6 py-4 text-[#D4AF37] font-bold">{row.price}</td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-1.5 text-xs text-gray-600">
-                                            <User size={12} /> {row.surveyor || '-'}
-                                        </div>
-                                        <div className="flex items-center gap-1.5 text-[10px] text-gray-400 mt-1">
-                                            <Calendar size={10} /> {row.date || '-'}
-                                        </div>
-                                    </td>
-                                </TableRow>
-                            ))}
-                        </tbody>
-                    </table>
-                  </div>
+                <tbody className="divide-y divide-gray-100">
+                    {allBumbu.map((row, idx) => (
+                        <TableRow key={idx} idx={idx}>
+                            <td className="px-6 py-4">
+                                <div className="font-bold text-gray-700">{row.name}</div>
+                                <div className="text-[10px] text-gray-400 font-medium">{row.originProduct}</div>
+                            </td>
+                            <td className="px-6 py-4">
+                                <div className="flex items-center gap-1.5 text-xs font-bold text-[#064E3B]">
+                                    <MapPin size={12} /> {row.loc}
+                                </div>
+                                <div className="text-[11px] font-bold text-gray-700 mt-1">{row.kitchenName || '-'}</div>
+                                <div className="text-[10px] text-gray-400">{row.address}</div>
+                                <div className="text-[10px] text-gray-500 mt-0.5">PIC: <span className="font-medium">{row.pic || '-'}</span></div>
+                            </td>
+                            <td className="px-6 py-4">
+                                <div className="text-gray-600 font-bold">{row.volume} Ton</div>
+                                <div className="text-[10px] text-gray-400">Bahan Lain: {row.otherIngredients || '-'}</div>
+                            </td>
+                            <td className="px-6 py-4 text-[#D4AF37] font-bold">SAR {row.price}</td>
+                            <td className="px-6 py-4">
+                                <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                                    <User size={12} /> {row.surveyor || '-'}
+                                </div>
+                                <div className="flex items-center gap-2 mt-1">
+                                    <div className="flex items-center gap-1 text-[10px] text-gray-400">
+                                        <Calendar size={10} /> {row.date || '-'}
+                                    </div>
+                                    <div className="flex items-center gap-1 text-[10px] text-gray-400">
+                                        <Clock size={10} /> {row.time || '-'}
+                                    </div>
+                                </div>
+                            </td>
+                        </TableRow>
+                    ))}
+                </tbody>
               );
           case 'rte':
                return (
-                  <div className="overflow-hidden rounded-2xl border border-gray-200/50">
-                    <table className="w-full text-sm">
-                        <thead className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-200">
-                            <tr>
-                                <TableHeader>Perusahaan</TableHeader>
-                                <TableHeader>Menu / Jenis</TableHeader>
-                                <TableHeader>Lokasi Distribusi</TableHeader>
-                                <TableHeader>Volume & Harga</TableHeader>
-                                <TableHeader>Surveyor</TableHeader>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                            {rteData.map((row, idx) => (
-                                <TableRow key={row.id} idx={idx}>
-                                    <td className="px-6 py-4 font-bold text-[#064E3B]">{row.companyName}</td>
-                                    <td className="px-6 py-4 text-gray-700">{row.spiceType}</td>
-                                    <td className="px-6 py-4 text-gray-600 text-xs">
-                                        <div className="flex items-center gap-1">
-                                            <MapPin size={12} className="text-gray-400"/>
-                                            {row.kitchenLocation || '-'}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="font-medium text-gray-700">{row.volume} Porsi</div>
-                                        <div className="text-[10px] font-bold text-[#D4AF37]">SAR {row.price}</div>
-                                    </td>
-                                    <td className="px-6 py-4 text-xs text-gray-500">{row.surveyor || '-'}</td>
-                                </TableRow>
-                            ))}
-                        </tbody>
-                    </table>
-                  </div>
+                <tbody className="divide-y divide-gray-100">
+                    {rteData.map((row, idx) => (
+                        <TableRow key={row.id} idx={idx}>
+                            <td className="px-6 py-4">
+                                <div className="font-bold text-[#064E3B]">{row.companyName}</div>
+                            </td>
+                            <td className="px-6 py-4 text-gray-700 font-medium">{row.spiceType}</td>
+                            <td className="px-6 py-4">
+                                <div className="text-xs font-bold text-gray-700">{row.kitchenName || '-'}</div>
+                                <div className="text-[10px] text-gray-500 flex items-center gap-1 mt-0.5">
+                                    <MapPin size={10} /> {row.address || '-'}
+                                </div>
+                                <div className="text-[10px] text-gray-500 mt-0.5">PIC: <span className="font-medium">{row.pic || '-'}</span></div>
+                            </td>
+                            <td className="px-6 py-4">
+                                <div className="font-medium text-gray-700">{row.volume} Porsi</div>
+                                <div className="text-[10px] font-bold text-[#D4AF37]">SAR {row.price}</div>
+                            </td>
+                            <td className="px-6 py-4">
+                                <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                                    <User size={12} /> {row.surveyor || '-'}
+                                </div>
+                                <div className="flex items-center gap-2 mt-1">
+                                    <div className="flex items-center gap-1 text-[10px] text-gray-400">
+                                        <Calendar size={10} /> {row.date || '-'}
+                                    </div>
+                                    <div className="flex items-center gap-1 text-[10px] text-gray-400">
+                                        <Clock size={10} /> {row.time || '-'}
+                                    </div>
+                                </div>
+                            </td>
+                        </TableRow>
+                    ))}
+                </tbody>
               );
           case 'tenant':
                return (
-                  <div className="overflow-hidden rounded-2xl border border-gray-200/50">
-                    <table className="w-full text-sm">
-                        <thead className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-200">
-                            <tr>
-                                <TableHeader>Nama Toko</TableHeader>
-                                <TableHeader>Lokasi Hotel</TableHeader>
-                                <TableHeader>Produk Utama</TableHeader>
-                                <TableHeader>Biaya Sewa</TableHeader>
-                                <TableHeader>Tanggal Survei</TableHeader>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                            {tenantData.map((row, idx) => (
-                                <TableRow key={row.id} idx={idx}>
-                                    <td className="px-6 py-4 font-bold text-[#064E3B]">{row.shopName}</td>
-                                    <td className="px-6 py-4 text-gray-600 text-xs font-medium">
-                                        {row.hotelName || '-'}
-                                    </td>
-                                    <td className="px-6 py-4 text-gray-700">
-                                        <div>{row.productType}</div>
-                                        <div className="text-[10px] text-gray-400">Best: {row.bestSeller}</div>
-                                    </td>
-                                    <td className="px-6 py-4 text-[#D4AF37] font-bold">SAR {row.rentCost}</td>
-                                    <td className="px-6 py-4 text-xs text-gray-500">{row.date}</td>
-                                </TableRow>
-                            ))}
-                        </tbody>
-                    </table>
-                  </div>
+                <tbody className="divide-y divide-gray-100">
+                    {tenantData.map((row, idx) => (
+                        <TableRow key={row.id} idx={idx}>
+                            <td className="px-6 py-4">
+                                <div className="font-bold text-[#064E3B]">{row.shopName}</div>
+                            </td>
+                            <td className="px-6 py-4">
+                                <div className="flex items-center gap-1.5 text-xs font-bold text-gray-700">
+                                    <Building size={12} className="text-gray-400" /> {row.hotelName || '-'}
+                                </div>
+                                <div className="text-[10px] text-gray-500 ml-4">{row.location || '-'}</div>
+                                <div className="text-[10px] text-gray-500 ml-4">PIC: {row.pic || '-'}</div>
+                            </td>
+                            <td className="px-6 py-4 text-gray-700">
+                                <div className="font-medium text-xs">{row.productType}</div>
+                                <div className="text-[10px] text-gray-400 mt-0.5">Best: {row.bestSeller}</div>
+                            </td>
+                            <td className="px-6 py-4 text-[#D4AF37] font-bold">SAR {row.rentCost}</td>
+                            <td className="px-6 py-4">
+                                <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                                    <User size={12} /> {row.surveyor || '-'}
+                                </div>
+                                <div className="flex items-center gap-2 mt-1">
+                                    <div className="flex items-center gap-1 text-[10px] text-gray-400">
+                                        <Calendar size={10} /> {row.date || '-'}
+                                    </div>
+                                    <div className="flex items-center gap-1 text-[10px] text-gray-400">
+                                        <Clock size={10} /> {row.time || '-'}
+                                    </div>
+                                </div>
+                            </td>
+                        </TableRow>
+                    ))}
+                </tbody>
               );
           case 'ekspedisi':
               return (
-                 <div className="overflow-hidden rounded-2xl border border-gray-200/50">
-                    <table className="w-full text-sm">
-                        <thead className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-200">
-                            <tr>
-                                <TableHeader>Perusahaan</TableHeader>
-                                <TableHeader>Lokasi Asal</TableHeader>
-                                <TableHeader>Berat (Kg)</TableHeader>
-                                <TableHeader>Harga / Kg</TableHeader>
-                                <TableHeader>Petugas</TableHeader>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                            {expeditionData.map((row, idx) => (
-                                <TableRow key={row.id} idx={idx}>
-                                    <td className="px-6 py-4 font-bold text-[#064E3B]">{row.companyName}</td>
-                                    <td className="px-6 py-4 text-xs text-gray-600">{row.hotelName || '-'}</td>
-                                    <td className="px-6 py-4 text-gray-700 font-medium">{row.weight}</td>
-                                    <td className="px-6 py-4 text-[#D4AF37] font-bold">SAR {row.pricePerKg}</td>
-                                    <td className="px-6 py-4 text-xs text-gray-500">{row.surveyor}</td>
-                                </TableRow>
-                            ))}
-                        </tbody>
-                    </table>
-                 </div>
+                <tbody className="divide-y divide-gray-100">
+                    {expeditionData.map((row, idx) => (
+                        <TableRow key={row.id} idx={idx}>
+                            <td className="px-6 py-4 font-bold text-[#064E3B]">{row.companyName}</td>
+                            <td className="px-6 py-4">
+                                <div className="flex items-center gap-1.5 text-xs font-bold text-gray-700">
+                                    <Building size={12} className="text-gray-400" /> {row.hotelName || '-'}
+                                </div>
+                                <div className="text-[10px] text-gray-500 ml-4">{row.location || '-'}</div>
+                                <div className="text-[10px] text-gray-500 ml-4">PIC: {row.pic || '-'}</div>
+                            </td>
+                            <td className="px-6 py-4 text-gray-700 font-medium">{row.weight} Kg</td>
+                            <td className="px-6 py-4 text-[#D4AF37] font-bold">SAR {row.pricePerKg}</td>
+                            <td className="px-6 py-4">
+                                <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                                    <User size={12} /> {row.surveyor || '-'}
+                                </div>
+                                <div className="flex items-center gap-2 mt-1">
+                                    <div className="flex items-center gap-1 text-[10px] text-gray-400">
+                                        <Calendar size={10} /> {row.date || '-'}
+                                    </div>
+                                    <div className="flex items-center gap-1 text-[10px] text-gray-400">
+                                        <Clock size={10} /> {row.time || '-'}
+                                    </div>
+                                </div>
+                            </td>
+                        </TableRow>
+                    ))}
+                </tbody>
              );
           case 'telco':
               return (
-                 <div className="overflow-hidden rounded-2xl border border-gray-200/50">
-                    <table className="w-full text-sm">
-                        <thead className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-200">
-                            <tr>
-                                <TableHeader>Provider</TableHeader>
-                                <TableHeader>Data Responden</TableHeader>
-                                <TableHeader>Paket Roaming</TableHeader>
-                                <TableHeader>Status</TableHeader>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                            {telecomData.map((row, idx) => (
-                                <TableRow key={row.id} idx={idx}>
-                                    <td className="px-6 py-4 font-bold text-[#064E3B]">{row.providerName}</td>
-                                    <td className="px-6 py-4">
-                                        <div className="text-xs font-bold text-gray-700">{row.respondentName || '-'}</div>
-                                        <div className="text-[10px] text-gray-400">Kloter: {row.kloter || '-'}</div>
-                                    </td>
-                                    <td className="px-6 py-4 text-gray-700 text-xs">{row.roamingPackage || '-'}</td>
-                                    <td className="px-6 py-4">
-                                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${telecomActive[row.id] ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}`}>
-                                            <span className={`w-1.5 h-1.5 rounded-full ${telecomActive[row.id] ? 'bg-emerald-600' : 'bg-gray-400'}`}></span>
-                                            {telecomActive[row.id] ? 'Aktif' : 'Tidak Aktif'}
-                                        </span>
-                                    </td>
-                                </TableRow>
-                            ))}
-                        </tbody>
-                    </table>
-                 </div>
+                <tbody className="divide-y divide-gray-100">
+                    {telecomData.map((row, idx) => (
+                        <TableRow key={row.id} idx={idx}>
+                            <td className="px-6 py-4 font-bold text-[#064E3B]">{row.providerName}</td>
+                            <td className="px-6 py-4">
+                                <div className="text-xs font-bold text-gray-700">{row.respondentName || '-'}</div>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                    <span className="text-[10px] bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">Kloter: {row.kloter || '-'}</span>
+                                    <span className="text-[10px] bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">{row.embarkation || '-'}</span>
+                                </div>
+                                <div className="text-[10px] text-gray-400 mt-0.5">{row.province}</div>
+                            </td>
+                            <td className="px-6 py-4 text-gray-700 text-xs">{row.roamingPackage || '-'}</td>
+                            <td className="px-6 py-4">
+                                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${telecomActive[row.id] ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}`}>
+                                    <span className={`w-1.5 h-1.5 rounded-full ${telecomActive[row.id] ? 'bg-emerald-600' : 'bg-gray-400'}`}></span>
+                                    {telecomActive[row.id] ? 'Aktif' : 'Tidak Aktif'}
+                                </span>
+                            </td>
+                            <td className="px-6 py-4">
+                                <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                                    <User size={12} /> {row.surveyor || '-'}
+                                </div>
+                                <div className="flex items-center gap-2 mt-1">
+                                    <div className="flex items-center gap-1 text-[10px] text-gray-400">
+                                        <Calendar size={10} /> {row.date || '-'}
+                                    </div>
+                                    <div className="flex items-center gap-1 text-[10px] text-gray-400">
+                                        <Clock size={10} /> {row.time || '-'}
+                                    </div>
+                                </div>
+                            </td>
+                        </TableRow>
+                    ))}
+                </tbody>
              );
           default:
-              return <div className="p-12 text-center text-gray-400 font-medium">Data belum tersedia untuk kategori ini.</div>;
+              return <tbody><tr><td colSpan={5} className="p-12 text-center text-gray-400 font-medium">Data belum tersedia.</td></tr></tbody>;
       }
+  }
+
+  const renderTable = () => {
+    return (
+        <div className="overflow-hidden rounded-2xl border border-gray-200/50">
+            <table className="w-full text-sm">
+                <thead className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-200">
+                    <tr>
+                        {activeTab === 'bumbu' && (
+                            <>
+                                <TableHeader>Jenis Bumbu</TableHeader>
+                                <TableHeader>Detail Dapur & PIC</TableHeader>
+                                <TableHeader>Data Bumbu</TableHeader>
+                                <TableHeader>Harga (SAR)</TableHeader>
+                                <TableHeader>Surveyor & Waktu</TableHeader>
+                            </>
+                        )}
+                        {activeTab === 'rte' && (
+                            <>
+                                <TableHeader>Perusahaan</TableHeader>
+                                <TableHeader>Menu / Jenis</TableHeader>
+                                <TableHeader>Lokasi & PIC</TableHeader>
+                                <TableHeader>Volume & Harga</TableHeader>
+                                <TableHeader>Surveyor & Waktu</TableHeader>
+                            </>
+                        )}
+                        {activeTab === 'tenant' && (
+                            <>
+                                <TableHeader>Nama Toko</TableHeader>
+                                <TableHeader>Lokasi Hotel & PIC</TableHeader>
+                                <TableHeader>Produk Utama</TableHeader>
+                                <TableHeader>Biaya Sewa</TableHeader>
+                                <TableHeader>Surveyor & Waktu</TableHeader>
+                            </>
+                        )}
+                        {activeTab === 'ekspedisi' && (
+                            <>
+                                <TableHeader>Perusahaan</TableHeader>
+                                <TableHeader>Lokasi Asal & PIC</TableHeader>
+                                <TableHeader>Berat (Kg)</TableHeader>
+                                <TableHeader>Harga / Kg</TableHeader>
+                                <TableHeader>Surveyor & Waktu</TableHeader>
+                            </>
+                        )}
+                        {activeTab === 'telco' && (
+                            <>
+                                <TableHeader>Provider</TableHeader>
+                                <TableHeader>Identitas Jemaah</TableHeader>
+                                <TableHeader>Paket Roaming</TableHeader>
+                                <TableHeader>Status</TableHeader>
+                                <TableHeader>Surveyor & Waktu</TableHeader>
+                            </>
+                        )}
+                    </tr>
+                </thead>
+                {renderTableBody()}
+            </table>
+        </div>
+    );
   };
 
   return (

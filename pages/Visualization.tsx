@@ -3,9 +3,10 @@ import { GlassCard } from '../components/GlassCard';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell, Legend, AreaChart, Area, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ReferenceLine } from 'recharts';
 import { useData } from '../contexts/DataContext';
 import { PieChart as PieIcon, TrendingUp, Info, BarChart3, MapPin, Activity, Radio, Calendar, Filter, ChevronDown, Check } from 'lucide-react';
+import { ChartSkeleton, PieSkeleton } from '../components/Skeletons';
 
 export const Visualization: React.FC = () => {
-    const { bumbuMakkah, bumbuMadinah, telecomActive, telecomData, expeditionData, tenantData } = useData();
+    const { bumbuMakkah, bumbuMadinah, telecomActive, telecomData, expeditionData, tenantData, isLoading } = useData();
     const currentDate = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
     // Filter State: Time based
@@ -217,32 +218,34 @@ export const Visualization: React.FC = () => {
                     <GlassCard 
                         title="Komparasi Harga Bumbu" 
                         subtitle={`Rata-rata Harga Pasar (SAR) - ${timeFilter === 'all' ? 'Periode 2026' : timeFilter}`} 
-                        className="!bg-white/70 h-full"
+                        className="!bg-white/70 h-full min-h-[400px]"
                         action={<div className="p-2 bg-emerald-50 rounded-lg text-emerald-700"><BarChart3 size={18}/></div>}
                     >
                         <div className="h-[350px] mt-4 w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={dataPriceComparison} margin={{ top: 20, right: 30, left: 10, bottom: 5 }} barGap={2}>
-                                    <defs>
-                                        <linearGradient id="gradMakkah" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="0%" stopColor={COLORS.primary} stopOpacity={1}/>
-                                            <stop offset="100%" stopColor={COLORS.primary} stopOpacity={0.7}/>
-                                        </linearGradient>
-                                        <linearGradient id="gradMadinah" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="0%" stopColor={COLORS.accent} stopOpacity={1}/>
-                                            <stop offset="100%" stopColor={COLORS.accent} stopOpacity={0.7}/>
-                                        </linearGradient>
-                                    </defs>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                                    <XAxis dataKey="name" fontSize={11} stroke="#6B7280" tickLine={false} axisLine={false} dy={10} fontWeight={500} />
-                                    <YAxis fontSize={11} stroke="#6B7280" tickLine={false} axisLine={false} />
-                                    <Tooltip cursor={{fill: '#F3F4F6', radius: 8}} content={<CustomTooltip unit="SAR" />} />
-                                    <Legend iconType="circle" wrapperStyle={{paddingTop: '20px'}} />
-                                    
-                                    <Bar dataKey="makkah" name="Makkah" fill="url(#gradMakkah)" radius={[6, 6, 0, 0]} barSize={24} />
-                                    <Bar dataKey="madinah" name="Madinah" fill="url(#gradMadinah)" radius={[6, 6, 0, 0]} barSize={24} />
-                                </BarChart>
-                            </ResponsiveContainer>
+                             {isLoading ? <ChartSkeleton /> : (
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={dataPriceComparison} margin={{ top: 20, right: 30, left: 10, bottom: 5 }} barGap={2}>
+                                        <defs>
+                                            <linearGradient id="gradMakkah" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="0%" stopColor={COLORS.primary} stopOpacity={1}/>
+                                                <stop offset="100%" stopColor={COLORS.primary} stopOpacity={0.7}/>
+                                            </linearGradient>
+                                            <linearGradient id="gradMadinah" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="0%" stopColor={COLORS.accent} stopOpacity={1}/>
+                                                <stop offset="100%" stopColor={COLORS.accent} stopOpacity={0.7}/>
+                                            </linearGradient>
+                                        </defs>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                                        <XAxis dataKey="name" fontSize={11} stroke="#6B7280" tickLine={false} axisLine={false} dy={10} fontWeight={500} />
+                                        <YAxis fontSize={11} stroke="#6B7280" tickLine={false} axisLine={false} />
+                                        <Tooltip cursor={{fill: '#F3F4F6', radius: 8}} content={<CustomTooltip unit="SAR" />} />
+                                        <Legend iconType="circle" wrapperStyle={{paddingTop: '20px'}} />
+                                        
+                                        <Bar dataKey="makkah" name="Makkah" fill="url(#gradMakkah)" radius={[6, 6, 0, 0]} barSize={24} />
+                                        <Bar dataKey="madinah" name="Madinah" fill="url(#gradMadinah)" radius={[6, 6, 0, 0]} barSize={24} />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                             )}
                         </div>
                     </GlassCard>
                 </div>
@@ -252,36 +255,40 @@ export const Visualization: React.FC = () => {
                     <GlassCard 
                         title="Market Share" 
                         subtitle="Estimasi Pengguna Aktif" 
-                        className="!bg-white/70 h-full"
+                        className="!bg-white/70 h-full min-h-[400px]"
                         action={<div className="p-2 bg-blue-50 rounded-lg text-blue-700"><Radio size={18}/></div>}
                     >
                         <div className="h-[350px] mt-4 relative flex items-center justify-center">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie 
-                                        data={dataTelcoShare} 
-                                        cx="50%" 
-                                        cy="50%" 
-                                        innerRadius={80} 
-                                        outerRadius={110} 
-                                        paddingAngle={5} 
-                                        dataKey="value"
-                                        cornerRadius={8}
-                                        stroke="none"
-                                    >
-                                        {dataTelcoShare.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={entry.color} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip content={<CustomTooltip />} />
-                                    <Legend layout="horizontal" verticalAlign="bottom" align="center" iconType="circle" wrapperStyle={{fontSize: '11px', fontWeight: 600}} />
-                                </PieChart>
-                            </ResponsiveContainer>
-                            {/* Center Label */}
-                            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pb-8">
-                                <span className="text-4xl font-bold text-[#064E3B] font-playfair">{dataTelcoShare.length}</span>
-                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Provider</span>
-                            </div>
+                            {isLoading ? <PieSkeleton /> : (
+                                <>
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <PieChart>
+                                            <Pie 
+                                                data={dataTelcoShare} 
+                                                cx="50%" 
+                                                cy="50%" 
+                                                innerRadius={80} 
+                                                outerRadius={110} 
+                                                paddingAngle={5} 
+                                                dataKey="value"
+                                                cornerRadius={8}
+                                                stroke="none"
+                                            >
+                                                {dataTelcoShare.map((entry, index) => (
+                                                    <Cell key={`cell-${index}`} fill={entry.color} />
+                                                ))}
+                                            </Pie>
+                                            <Tooltip content={<CustomTooltip />} />
+                                            <Legend layout="horizontal" verticalAlign="bottom" align="center" iconType="circle" wrapperStyle={{fontSize: '11px', fontWeight: 600}} />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                    {/* Center Label */}
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pb-8">
+                                        <span className="text-4xl font-bold text-[#064E3B] font-playfair">{dataTelcoShare.length}</span>
+                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Provider</span>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </GlassCard>
                 </div>
@@ -294,33 +301,35 @@ export const Visualization: React.FC = () => {
                 <GlassCard 
                     title="Volume Kargo" 
                     subtitle={`Total Berat (Kg) - ${timeFilter === 'all' ? 'Tahun Ini' : timeFilter}`} 
-                    className="!bg-white/70"
+                    className="!bg-white/70 min-h-[400px]"
                     action={<div className="p-2 bg-amber-50 rounded-lg text-amber-700"><Activity size={18}/></div>}
                 >
                     <div className="h-[320px] mt-6">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={dataExpeditionTrend} margin={{ top: 10, right: 30, left: 10, bottom: 5 }}>
-                                <defs>
-                                    <linearGradient id="colorBerat" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor={COLORS.accent} stopOpacity={0.8}/>
-                                        <stop offset="95%" stopColor={COLORS.accent} stopOpacity={0}/>
-                                    </linearGradient>
-                                </defs>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                                <XAxis dataKey="name" fontSize={11} stroke="#6B7280" tickLine={false} axisLine={false} dy={10} />
-                                <YAxis fontSize={11} stroke="#6B7280" tickLine={false} axisLine={false} />
-                                <Tooltip content={<CustomTooltip unit="Kg" />} />
-                                <Area 
-                                    type="monotone" 
-                                    dataKey="berat" 
-                                    stroke={COLORS.accent} 
-                                    strokeWidth={3} 
-                                    fillOpacity={1} 
-                                    fill="url(#colorBerat)" 
-                                    activeDot={{ r: 6, strokeWidth: 0, fill: COLORS.primary }}
-                                />
-                            </AreaChart>
-                        </ResponsiveContainer>
+                        {isLoading ? <ChartSkeleton /> : (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={dataExpeditionTrend} margin={{ top: 10, right: 30, left: 10, bottom: 5 }}>
+                                    <defs>
+                                        <linearGradient id="colorBerat" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor={COLORS.accent} stopOpacity={0.8}/>
+                                            <stop offset="95%" stopColor={COLORS.accent} stopOpacity={0}/>
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                                    <XAxis dataKey="name" fontSize={11} stroke="#6B7280" tickLine={false} axisLine={false} dy={10} />
+                                    <YAxis fontSize={11} stroke="#6B7280" tickLine={false} axisLine={false} />
+                                    <Tooltip content={<CustomTooltip unit="Kg" />} />
+                                    <Area 
+                                        type="monotone" 
+                                        dataKey="berat" 
+                                        stroke={COLORS.accent} 
+                                        strokeWidth={3} 
+                                        fillOpacity={1} 
+                                        fill="url(#colorBerat)" 
+                                        activeDot={{ r: 6, strokeWidth: 0, fill: COLORS.primary }}
+                                    />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        )}
                     </div>
                 </GlassCard>
 
@@ -328,26 +337,28 @@ export const Visualization: React.FC = () => {
                 <GlassCard 
                     title="Distribusi Revenue" 
                     subtitle={`Analisis Pendapatan (SAR) - ${timeFilter === 'all' ? 'Total' : timeFilter}`} 
-                    className="!bg-white/70"
+                    className="!bg-white/70 min-h-[400px]"
                     action={<div className="p-2 bg-purple-50 rounded-lg text-purple-700"><TrendingUp size={18}/></div>}
                 >
                     <div className="h-[320px] mt-6">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <RadarChart cx="50%" cy="50%" outerRadius="70%" data={dataHotelRevenue}>
-                                <PolarGrid stroke="#E5E7EB" strokeDasharray="4 4" />
-                                <PolarAngleAxis dataKey="subject" fontSize={11} tick={{ fill: '#4B5563', fontWeight: 'bold' }} />
-                                <PolarRadiusAxis angle={30} stroke="none" />
-                                <Radar 
-                                    name="Revenue (SAR)" 
-                                    dataKey="revenue" 
-                                    stroke={COLORS.secondary} 
-                                    strokeWidth={3} 
-                                    fill={COLORS.secondary} 
-                                    fillOpacity={0.3} 
-                                />
-                                <Tooltip content={<CustomTooltip unit="SAR" />} />
-                            </RadarChart>
-                        </ResponsiveContainer>
+                        {isLoading ? <PieSkeleton /> : (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <RadarChart cx="50%" cy="50%" outerRadius="70%" data={dataHotelRevenue}>
+                                    <PolarGrid stroke="#E5E7EB" strokeDasharray="4 4" />
+                                    <PolarAngleAxis dataKey="subject" fontSize={11} tick={{ fill: '#4B5563', fontWeight: 'bold' }} />
+                                    <PolarRadiusAxis angle={30} stroke="none" />
+                                    <Radar 
+                                        name="Revenue (SAR)" 
+                                        dataKey="revenue" 
+                                        stroke={COLORS.secondary} 
+                                        strokeWidth={3} 
+                                        fill={COLORS.secondary} 
+                                        fillOpacity={0.3} 
+                                    />
+                                    <Tooltip content={<CustomTooltip unit="SAR" />} />
+                                </RadarChart>
+                            </ResponsiveContainer>
+                        )}
                     </div>
                 </GlassCard>
 

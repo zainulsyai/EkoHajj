@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from '../../components/InputFields';
-import { Save, Plus, Trash2, ArrowLeft, UtensilsCrossed, MapPin, User, Calendar, Box, DollarSign, Clock, FileText } from 'lucide-react';
+import { Save, Plus, Trash2, ArrowLeft, UtensilsCrossed, MapPin, User, Calendar, Box, DollarSign, Clock, FileText, Building2 } from 'lucide-react';
 import { RTERecord } from '../../types';
 import { useData } from '../../contexts/DataContext';
 
@@ -11,7 +11,8 @@ interface RTEFormProps {
 export const RTEForm: React.FC<RTEFormProps> = ({ onBack }) => {
   const { rteData, setRteData } = useData();
   
-  // Identity State
+  // Identity State - No longer pre-filled
+  const [companyName, setCompanyName] = useState('');
   const [kitchenName, setKitchenName] = useState(''); 
   const [address, setAddress] = useState(''); 
   const [pic, setPic] = useState(''); 
@@ -19,9 +20,61 @@ export const RTEForm: React.FC<RTEFormProps> = ({ onBack }) => {
   const [monitorTime, setMonitorTime] = useState(''); 
   const [officer, setOfficer] = useState(''); 
 
+  const updateAllRecords = (field: keyof RTERecord, value: string) => {
+      setRteData(prev => prev.map(r => ({ ...r, [field]: value })));
+  };
+
+  // Handlers for Identity Inputs
+  const handleCompanyChange = (val: string) => { setCompanyName(val); updateAllRecords('companyName', val); };
+  const handleKitchenChange = (val: string) => { setKitchenName(val); updateAllRecords('kitchenName', val); };
+  const handleAddressChange = (val: string) => { setAddress(val); updateAllRecords('address', val); };
+  const handlePicChange = (val: string) => { setPic(val); updateAllRecords('pic', val); };
+  const handleOfficerChange = (val: string) => { setOfficer(val); updateAllRecords('surveyor', val); };
+
+  // CONVERSION HELPERS
+  const getDateValue = (dateStr: string) => {
+      if (!dateStr) return '';
+      const [day, month, year] = dateStr.split('/');
+      return `${year}-${month}-${day}`;
+  };
+  const handleDateChange = (val: string) => {
+      if (!val) {
+          setMonitorDate('');
+          updateAllRecords('date', '');
+          return;
+      }
+      const [year, month, day] = val.split('-');
+      const formatted = `${day}/${month}/${year}`;
+      setMonitorDate(formatted);
+      updateAllRecords('date', formatted);
+  };
+
+  const getTimeValue = (timeStr: string) => {
+      if (!timeStr) return '';
+      return timeStr.replace('.', ':');
+  };
+  const handleTimeChange = (val: string) => {
+      const formatted = val.replace(':', '.');
+      setMonitorTime(formatted);
+      updateAllRecords('time', formatted);
+  };
+
   const addRecord = () => {
       const newId = rteData.length > 0 ? Math.max(...rteData.map(r => r.id)) + 1 : 1;
-      setRteData([...rteData, { id: newId, companyName: '', spiceType: '', isUsed: true, volume: '', price: '' }]);
+      setRteData([...rteData, { 
+          id: newId, 
+          companyName, 
+          spiceType: '', 
+          isUsed: true, 
+          volume: '', 
+          price: '',
+          kitchenName,
+          address,
+          pic,
+          date: monitorDate,
+          time: monitorTime,
+          surveyor: officer
+      }]);
   };
 
   const removeRecord = (id: number) => {
@@ -59,20 +112,26 @@ export const RTEForm: React.FC<RTEFormProps> = ({ onBack }) => {
          <div className="bg-white/40 backdrop-blur-md border border-white/60 rounded-3xl p-8 shadow-sm">
              <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200/50">
                 <div className="p-2 bg-[#064E3B]/10 rounded-xl"><FileText size={18} className="text-[#064E3B]" /></div>
-                <h3 className="text-sm font-bold text-gray-800 uppercase tracking-widest">A. Identitas Lokasi</h3>
+                <h3 className="text-sm font-bold text-gray-800 uppercase tracking-widest">A. Identitas Lokasi & Petugas</h3>
              </div>
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <PremiumInput label="1. Nama Dapur" icon={MapPin} value={kitchenName} onChange={setKitchenName} placeholder="Isi nama dapur..." />
-                  <PremiumInput label="2. Alamat" icon={MapPin} value={address} onChange={setAddress} placeholder="Isi alamat..." />
-                  <PremiumInput label="3. Penanggung Jawab Dapur" icon={User} value={pic} onChange={setPic} placeholder="Isi nama PIC..." />
-                  <PremiumInput label="4. Tanggal Monitoring" icon={Calendar} type="date" value={monitorDate} onChange={setMonitorDate} />
-                  <PremiumInput label="5. Waktu Monitoring" icon={Clock} type="time" value={monitorTime} onChange={setMonitorTime} />
-                  <PremiumInput label="6. Petugas" icon={User} value={officer} onChange={setOfficer} placeholder="Isi nama petugas..." />
-                  <div className="flex items-end md:col-span-2">
-                      <button onClick={addRecord} className="w-full py-3.5 bg-white border border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-white rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow-lg hover:-translate-y-0.5">
-                        <Plus size={16} /> Tambah Perusahaan Baru
-                      </button>
-                  </div>
+             
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <PremiumInput label="1. Nama Dapur" icon={MapPin} value={kitchenName} onChange={handleKitchenChange} placeholder="Isi nama dapur..." />
+                  <PremiumInput label="2. Alamat" icon={MapPin} value={address} onChange={handleAddressChange} placeholder="Isi alamat..." />
+                  <PremiumInput label="3. Penanggung Jawab Dapur" icon={User} value={pic} onChange={handlePicChange} placeholder="Isi nama PIC..." />
+                  <PremiumInput label="4. Tanggal Monitoring" icon={Calendar} type="date" value={getDateValue(monitorDate)} onChange={handleDateChange} />
+                  <PremiumInput label="5. Waktu Monitoring" icon={Clock} type="time" value={getTimeValue(monitorTime)} onChange={handleTimeChange} />
+                  <PremiumInput label="6. Petugas Survei" icon={User} value={officer} onChange={handleOfficerChange} placeholder="Isi nama petugas..." />
+             </div>
+             
+             {/* Bottom Row: Company Name & Add Button */}
+             <div className="mt-6 pt-6 border-t border-gray-200/50 flex flex-col md:flex-row md:items-end gap-5">
+                <div className="flex-1">
+                    <PremiumInput label="Nama Perusahaan" icon={Building2} value={companyName} onChange={handleCompanyChange} placeholder="Isi nama perusahaan penyedia..." />
+                </div>
+                <button onClick={addRecord} className="mb-0.5 px-6 py-3.5 bg-white border border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-white rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow-lg hover:-translate-y-0.5 whitespace-nowrap">
+                    <Plus size={18} /> Tambah Menu / Jenis Bumbu
+                </button>
              </div>
          </div>
       </div>
@@ -92,18 +151,12 @@ export const RTEForm: React.FC<RTEFormProps> = ({ onBack }) => {
                             <span className="h-10 w-10 rounded-xl bg-[#064E3B]/10 flex items-center justify-center text-[#064E3B] font-bold text-sm border border-[#064E3B]/20 shadow-sm">#{idx + 1}</span>
                             <div className="flex flex-col">
                                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Entry Data</span>
-                                <span className="text-base font-bold text-gray-800 font-playfair">Detail Perusahaan</span>
+                                <span className="text-base font-bold text-gray-800 font-playfair">Detail Menu</span>
                             </div>
-                       </div>
-
-                       <div className="space-y-2">
-                           <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Nama Perusahaan</label>
-                           <Input value={record.companyName} onChange={(e) => handleRecordChange(record.id, 'companyName', e.target.value)} 
-                                  className="!py-3.5 !text-sm !bg-gray-50/50 focus:!bg-white !border-gray-200 focus:!border-[#064E3B] !rounded-xl !font-bold !text-gray-800 shadow-sm" placeholder="Contoh: PT. Halalan Thayyiban" />
                        </div>
                        
                        <div className="space-y-2">
-                           <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Jenis Bumbu</label>
+                           <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Jenis Bumbu / Menu</label>
                            <Input value={record.spiceType} onChange={(e) => handleRecordChange(record.id, 'spiceType', e.target.value)} 
                                   className="!py-3.5 !text-sm !bg-gray-50/50 focus:!bg-white !border-gray-200 focus:!border-[#064E3B] !rounded-xl" placeholder="Contoh: Bumbu Nasi Kuning" />
                        </div>
@@ -131,7 +184,7 @@ export const RTEForm: React.FC<RTEFormProps> = ({ onBack }) => {
                 <div className="w-16 h-16 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 mb-4 group-hover:scale-110 group-hover:bg-[#D4AF37] group-hover:text-white group-hover:border-[#D4AF37] transition-all shadow-sm">
                     <Plus size={32} />
                 </div>
-                <span className="text-sm font-bold text-gray-500 group-hover:text-[#D4AF37]">Tambah Perusahaan Lain</span>
+                <span className="text-sm font-bold text-gray-500 group-hover:text-[#D4AF37]">Tambah Menu Lain</span>
             </button>
           </div>
       </div>

@@ -1,31 +1,36 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Toggle } from '../../components/InputFields';
 import { BumbuRecord } from '../../types';
-import { Save, Search, ChefHat, ArrowLeft, ChevronDown, ChevronUp, MapPin, Calendar, Clock, User, ClipboardList, Package, DollarSign, Globe, FileText, AlertCircle } from 'lucide-react';
+import { Save, Search, ChefHat, ArrowLeft, ChevronDown, ChevronUp, MapPin, Calendar, Clock, User, ClipboardList, Package, DollarSign, Globe, FileText, AlertCircle, Building2 } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 
 interface SpiceFormProps {
-  location: 'Makkah' | 'Madinah';
   onBack: () => void;
 }
 
-export const SpiceForm: React.FC<SpiceFormProps> = ({ location, onBack }) => {
+export const SpiceForm: React.FC<SpiceFormProps> = ({ onBack }) => {
   const { bumbuMakkah, setBumbuMakkah, bumbuMadinah, setBumbuMadinah } = useData();
+  const [activeTab, setActiveTab] = useState<'Makkah' | 'Madinah'>('Makkah');
   const [searchTerm, setSearchTerm] = useState('');
   const [isIdentityExpanded, setIsIdentityExpanded] = useState(true);
   const [otherReason, setOtherReason] = useState('');
 
-  // Select correct data source based on location
-  const records = location === 'Makkah' ? bumbuMakkah : bumbuMadinah;
-  const setRecords = location === 'Makkah' ? setBumbuMakkah : setBumbuMadinah;
+  // Select correct data source based on active tab
+  const records = activeTab === 'Makkah' ? bumbuMakkah : bumbuMadinah;
+  const setRecords = activeTab === 'Makkah' ? setBumbuMakkah : setBumbuMadinah;
 
-  // Identity State
+  // Identity State - No longer pre-filled
   const [kitchenName, setKitchenName] = useState('');
   const [address, setAddress] = useState('');
   const [pic, setPic] = useState('');
   const [monitorDate, setMonitorDate] = useState('');
   const [monitorTime, setMonitorTime] = useState('');
   const [officer, setOfficer] = useState('');
+
+  // Helper to update identity fields in bulk for all records
+  const updateIdentity = (field: keyof BumbuRecord, value: string) => {
+      setRecords(prev => prev.map(r => ({ ...r, [field]: value })));
+  };
 
   const handleRecordChange = (id: number, field: keyof BumbuRecord, value: any) => {
     setRecords(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r));
@@ -36,6 +41,38 @@ export const SpiceForm: React.FC<SpiceFormProps> = ({ location, onBack }) => {
         record.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [records, searchTerm]);
+
+  // CONVERSION HELPERS
+  // Convert dd/mm/yyyy -> yyyy-mm-dd for input value
+  const getDateValue = (dateStr: string) => {
+      if (!dateStr) return '';
+      const [day, month, year] = dateStr.split('/');
+      return `${year}-${month}-${day}`;
+  };
+  // Convert yyyy-mm-dd -> dd/mm/yyyy for storage
+  const handleDateChange = (val: string) => {
+      if (!val) {
+          setMonitorDate('');
+          updateIdentity('date', '');
+          return;
+      }
+      const [year, month, day] = val.split('-');
+      const formatted = `${day}/${month}/${year}`;
+      setMonitorDate(formatted);
+      updateIdentity('date', formatted);
+  };
+
+  // Convert HH.mm -> HH:mm for input value
+  const getTimeValue = (timeStr: string) => {
+      if (!timeStr) return '';
+      return timeStr.replace('.', ':');
+  };
+  // Convert HH:mm -> HH.mm for storage
+  const handleTimeChange = (val: string) => {
+      const formatted = val.replace(':', '.');
+      setMonitorTime(formatted);
+      updateIdentity('time', formatted);
+  };
 
   return (
     <div className="flex flex-col relative font-sans bg-white/60 backdrop-blur-xl rounded-[2.5rem] border border-white/60 shadow-2xl overflow-hidden transition-all duration-500">
@@ -50,7 +87,7 @@ export const SpiceForm: React.FC<SpiceFormProps> = ({ location, onBack }) => {
                         <ChefHat size={32} strokeWidth={1.5} />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-[#064E3B] leading-none tracking-tight font-playfair mb-1.5">Bumbu {location}</h1>
+                        <h1 className="text-2xl font-bold text-[#064E3B] leading-none tracking-tight font-playfair mb-1.5">Bumbu Pasta</h1>
                         <div className="flex items-center gap-2">
                             <span className="px-2 py-0.5 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[10px] font-bold text-[#D4AF37] uppercase tracking-widest">Layanan Konsumsi</span>
                         </div>
@@ -79,20 +116,58 @@ export const SpiceForm: React.FC<SpiceFormProps> = ({ location, onBack }) => {
              </div>
           </div>
 
+          {/* Location Toggle Tabs */}
+          <div className="px-8 pb-4">
+              <div className="flex p-1.5 bg-gray-100/50 backdrop-blur-md rounded-2xl w-fit border border-gray-200/50">
+                  {['Makkah', 'Madinah'].map((loc) => (
+                      <button
+                          key={loc}
+                          onClick={() => setActiveTab(loc as 'Makkah' | 'Madinah')}
+                          className={`px-8 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${
+                              activeTab === loc 
+                              ? 'bg-white text-[#064E3B] shadow-md shadow-gray-200' 
+                              : 'text-gray-400 hover:text-gray-600'
+                          }`}
+                      >
+                          Wilayah {loc}
+                      </button>
+                  ))}
+              </div>
+          </div>
+
           {/* Identity Panel (A. Identitas Lokasi) */}
           <div className="px-8 pb-2 relative">
              <div className={`bg-white/40 backdrop-blur-md border border-white/60 rounded-3xl overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] shadow-sm relative z-10 ${isIdentityExpanded ? 'max-h-[600px] opacity-100 mb-8 p-8' : 'max-h-0 opacity-0 mb-0 p-0 border-0'}`}>
                 <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200/50">
                     <div className="p-2 bg-[#064E3B]/10 rounded-xl"><FileText size={18} className="text-[#064E3B]" /></div>
-                    <h3 className="text-sm font-bold text-gray-800 uppercase tracking-widest">A. Identitas Lokasi</h3>
+                    <h3 className="text-sm font-bold text-gray-800 uppercase tracking-widest">A. Identitas Lokasi & Petugas ({activeTab})</h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
-                  <PremiumInput label="1. Nama Dapur" icon={MapPin} value={kitchenName} onChange={setKitchenName} placeholder="Isi nama dapur..." />
-                  <PremiumInput label="2. Alamat" icon={MapPin} value={address} onChange={setAddress} placeholder="Isi alamat lengkap..." />
-                  <PremiumInput label="3. Penanggung Jawab Dapur" icon={User} value={pic} onChange={setPic} placeholder="Isi nama PIC..." />
-                  <PremiumInput label="4. Tanggal Monitoring" icon={Calendar} type="date" value={monitorDate} onChange={setMonitorDate} />
-                  <PremiumInput label="5. Waktu Monitoring" icon={Clock} type="time" value={monitorTime} onChange={setMonitorTime} />
-                  <PremiumInput label="6. Petugas" icon={User} value={officer} onChange={setOfficer} placeholder="Isi nama petugas..." />
+                  <PremiumInput label="1. Nama Dapur" icon={MapPin} value={kitchenName} 
+                      onChange={(val: string) => { setKitchenName(val); updateIdentity('kitchenName', val); }} 
+                      placeholder="Isi nama dapur..." />
+                  <PremiumInput label="2. Alamat" icon={MapPin} value={address} 
+                      onChange={(val: string) => { setAddress(val); updateIdentity('address', val); }} 
+                      placeholder="Isi alamat lengkap..." />
+                  <PremiumInput label="3. Penanggung Jawab Dapur" icon={User} value={pic} 
+                      onChange={(val: string) => { setPic(val); updateIdentity('pic', val); }} 
+                      placeholder="Isi nama PIC..." />
+                  
+                  {/* Date Input with Conversion */}
+                  <PremiumInput label="4. Tanggal Monitoring" icon={Calendar} type="date" 
+                      value={getDateValue(monitorDate)} 
+                      onChange={handleDateChange}
+                  />
+
+                  {/* Time Input with Conversion */}
+                  <PremiumInput label="5. Waktu Monitoring" icon={Clock} type="time" 
+                      value={getTimeValue(monitorTime)} 
+                      onChange={handleTimeChange} 
+                  />
+                  
+                  <PremiumInput label="6. Petugas Survei" icon={User} value={officer} 
+                      onChange={(val: string) => { setOfficer(val); updateIdentity('surveyor', val); }} 
+                      placeholder="Isi nama petugas..." />
                 </div>
              </div>
              
@@ -116,8 +191,8 @@ export const SpiceForm: React.FC<SpiceFormProps> = ({ location, onBack }) => {
               <div className="flex items-center gap-3">
                 <div className="p-2.5 bg-[#064E3B] rounded-xl shadow-lg shadow-[#064E3B]/20"><Package size={20} className="text-white" /></div>
                 <div>
-                    <h3 className="text-lg font-bold text-[#064E3B] font-playfair">B. Jenis Bumbu Pasta</h3>
-                    <p className="text-xs text-gray-500 font-medium tracking-wide">Input ketersediaan, volume, dan harga</p>
+                    <h3 className="text-lg font-bold text-[#064E3B] font-playfair">B. Jenis Bumbu Pasta ({activeTab})</h3>
+                    <p className="text-xs text-gray-500 font-medium tracking-wide">Input ketersediaan, perusahaan penyedia, volume, dan harga</p>
                 </div>
               </div>
               <div className="px-4 py-2 bg-white/50 rounded-lg text-xs font-bold text-gray-500 border border-white">
@@ -154,6 +229,15 @@ export const SpiceForm: React.FC<SpiceFormProps> = ({ location, onBack }) => {
                    {/* Data Body */}
                    <div className={`pl-6 pr-5 py-6 space-y-6 transition-all duration-500 ${record.isUsed ? 'block opacity-100' : 'hidden opacity-0'}`}>
                        
+                       {/* Row 0: Nama Perusahaan (NEW) */}
+                       <div className="space-y-1.5 pb-4 border-b border-dashed border-gray-200">
+                           <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5"><Building2 size={12} className="text-[#064E3B]"/> Perusahaan Penyedia</label>
+                           <div className="relative group/input">
+                               <input type="text" value={record.companyName || ''} onChange={(e) => handleRecordChange(record.id, 'companyName', e.target.value)} 
+                                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-800 focus:border-[#064E3B] focus:ring-4 focus:ring-[#064E3B]/5 outline-none transition-all placeholder:font-normal placeholder:text-gray-300" placeholder="Nama Perusahaan / Suplier..." />
+                           </div>
+                       </div>
+
                        {/* Row 1: Volume/Ton & Harga */}
                        <div className="grid grid-cols-2 gap-5">
                            <div className="space-y-1.5">
@@ -198,13 +282,13 @@ export const SpiceForm: React.FC<SpiceFormProps> = ({ location, onBack }) => {
               ))}
           </div>
 
-          {/* Section C (Sesuai PDF) */}
+          {/* Section C */}
           <div className="relative group overflow-hidden rounded-3xl border border-white/60 shadow-xl bg-white/60 backdrop-blur-xl mb-8">
                <div className="absolute top-0 left-0 w-1.5 h-full bg-[#D4AF37]"></div>
                <div className="p-8">
                    <div className="flex items-center gap-3 mb-4">
                        <div className="p-2 bg-[#D4AF37]/10 rounded-lg border border-[#D4AF37]/20"><AlertCircle size={20} className="text-[#D4AF37]" /></div>
-                       <h3 className="text-base font-bold text-gray-800 uppercase tracking-wide">C. Alasan Memilih Bumbu Lain</h3>
+                       <h3 className="text-base font-bold text-gray-800 uppercase tracking-wide">C. Alasan Memilih Bumbu Lain ({activeTab})</h3>
                    </div>
                    <textarea 
                       value={otherReason}

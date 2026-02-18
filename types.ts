@@ -8,10 +8,14 @@ export interface BumbuRecord {
   otherIngredients: string;
   originProduct: string;
   productPrice: string;
+  companyName?: string; // Added: Perusahaan Penyedia per item
   // Metadata Identitas
   kitchenName?: string;
+  address?: string; // Added
+  pic?: string;     // Added
   surveyor?: string;
   date?: string;
+  time?: string;    // Added
 }
 
 export interface RTERecord {
@@ -22,9 +26,12 @@ export interface RTERecord {
   volume: string;
   price: string;
   // Metadata Identitas
-  kitchenLocation?: string;
+  kitchenName?: string; // Changed/Standardized
+  address?: string;     // Added
+  pic?: string;         // Added
   surveyor?: string;
   date?: string;
+  time?: string;        // Added
 }
 
 export interface TenantRecord {
@@ -35,8 +42,11 @@ export interface TenantRecord {
   rentCost: string;
   // Metadata Identitas
   hotelName?: string;
+  location?: string;    // Added (Area/Floor)
+  pic?: string;         // Added
   surveyor?: string;
   date?: string;
+  time?: string;        // Added
 }
 
 export interface ExpeditionRecord {
@@ -46,8 +56,11 @@ export interface ExpeditionRecord {
   weight: string;
   // Metadata Identitas
   hotelName?: string;
+  location?: string;    // Added
+  pic?: string;         // Added
   surveyor?: string;
   date?: string;
+  time?: string;        // Added
 }
 
 export interface TelecomRecord {
@@ -57,15 +70,18 @@ export interface TelecomRecord {
   // Metadata Identitas
   respondentName?: string;
   kloter?: string;
+  embarkation?: string; // Added
+  province?: string;    // Added
   surveyor?: string;
+  date?: string;
+  time?: string;        // Added
 }
 
 export enum Page {
   LOGIN = 'LOGIN',
   DASHBOARD = 'DASHBOARD',
   DATA_ENTRY_PORTAL = 'DATA_ENTRY_PORTAL',
-  FORM_BUMBU_MAKKAH = 'FORM_BUMBU_MAKKAH',
-  FORM_BUMBU_MADINAH = 'FORM_BUMBU_MADINAH',
+  FORM_BUMBU = 'FORM_BUMBU',
   FORM_RTE = 'FORM_RTE',
   FORM_TENANT = 'FORM_TENANT',
   FORM_EXPEDITION = 'FORM_EXPEDITION',
