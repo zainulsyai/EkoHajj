@@ -1,4 +1,3 @@
-
 export interface BumbuRecord {
   id: number;
   name: string;
@@ -8,14 +7,14 @@ export interface BumbuRecord {
   otherIngredients: string;
   originProduct: string;
   productPrice: string;
-  companyName?: string; // Added: Perusahaan Penyedia per item
+  companyName?: string;
   // Metadata Identitas
   kitchenName?: string;
-  address?: string; // Added
-  pic?: string;     // Added
+  address?: string;
+  pic?: string;
   surveyor?: string;
   date?: string;
-  time?: string;    // Added
+  time?: string;
 }
 
 export interface RTERecord {
@@ -26,12 +25,15 @@ export interface RTERecord {
   volume: string;
   price: string;
   // Metadata Identitas
-  kitchenName?: string; // Changed/Standardized
-  address?: string;     // Added
-  pic?: string;         // Added
+  kitchenName?: string;
+  address?: string;
+  hotelName?: string;   // Added from PDF Page 7
+  hotelNumber?: string; // Added from PDF Page 7
+  kloterName?: string;  // Added from PDF Page 7
+  pic?: string; // Used for "Petugas" in some contexts or generic PIC
   surveyor?: string;
   date?: string;
-  time?: string;        // Added
+  time?: string;
 }
 
 export interface TenantRecord {
@@ -42,11 +44,13 @@ export interface TenantRecord {
   rentCost: string;
   // Metadata Identitas
   hotelName?: string;
-  location?: string;    // Added (Area/Floor)
-  pic?: string;         // Added
+  address?: string;
+  sector?: string;      // Added from PDF Page 10
+  location?: string;    
+  pic?: string;        
   surveyor?: string;
   date?: string;
-  time?: string;        // Added
+  time?: string;
 }
 
 export interface ExpeditionRecord {
@@ -56,11 +60,13 @@ export interface ExpeditionRecord {
   weight: string;
   // Metadata Identitas
   hotelName?: string;
-  location?: string;    // Added
-  pic?: string;         // Added
+  address?: string;
+  sector?: string;      // Added from PDF Page 11
+  location?: string;
+  pic?: string;
   surveyor?: string;
   date?: string;
-  time?: string;        // Added
+  time?: string;
 }
 
 export interface TelecomRecord {
@@ -69,12 +75,31 @@ export interface TelecomRecord {
   roamingPackage: string;
   // Metadata Identitas
   respondentName?: string;
-  kloter?: string;
-  embarkation?: string; // Added
-  province?: string;    // Added
+  kloter?: string;      // Added from PDF Page 13
+  embarkation?: string; // Added from PDF Page 13
+  province?: string;    // Added from PDF Page 13
   surveyor?: string;
   date?: string;
-  time?: string;        // Added
+  time?: string;
+}
+
+export interface RiceRecord {
+  id: number;
+  companyName: string;
+  riceType: string; // Premium or other
+  isUsed: boolean;
+  volume: string;
+  price: string;
+  otherRice: string;
+  originProduct: string;
+  productPrice: string;
+  // Metadata
+  kitchenName?: string;
+  address?: string;
+  pic?: string;
+  surveyor?: string;
+  date?: string;
+  time?: string;
 }
 
 export enum Page {
@@ -86,6 +111,7 @@ export enum Page {
   FORM_TENANT = 'FORM_TENANT',
   FORM_EXPEDITION = 'FORM_EXPEDITION',
   FORM_TELECOM = 'FORM_TELECOM',
+  FORM_RICE = 'FORM_RICE', // Added
   REPORTS = 'REPORTS',
   VISUALIZATION = 'VISUALIZATION',
   SETTINGS = 'SETTINGS'

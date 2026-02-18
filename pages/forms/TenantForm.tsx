@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Input } from '../../components/InputFields';
-import { Save, Store, Plus, Trash2, ArrowLeft, MapPin, User, Calendar, Building, ShoppingBag, TrendingUp, DollarSign, Clock, FileText } from 'lucide-react';
+import { Toggle } from '../../components/InputFields';
+import { Save, Store, Plus, Trash2, ArrowLeft, MapPin, User, Calendar, Building, ShoppingBag, TrendingUp, DollarSign, Clock, FileText, Layers, Tag } from 'lucide-react';
 import { TenantRecord } from '../../types';
 import { useData } from '../../contexts/DataContext';
 
@@ -11,74 +11,56 @@ interface TenantFormProps {
 export const TenantForm: React.FC<TenantFormProps> = ({ onBack }) => {
   const { tenantData, setTenantData } = useData();
 
-  // Identity State
   const [hotelName, setHotelName] = useState(''); 
-  const [location, setLocation] = useState(''); 
-  const [pic, setPic] = useState(''); 
+  const [address, setAddress] = useState(''); 
+  const [sector, setSector] = useState(''); 
   const [surveyor, setSurveyor] = useState(''); 
   const [surveyDate, setSurveyDate] = useState(''); 
   const [surveyTime, setSurveyTime] = useState(''); 
+
+  const handleRecordChange = (id: number, field: keyof TenantRecord, value: string) => {
+    setTenantData(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r));
+  };
 
   const addRecord = () => {
     const newId = tenantData.length > 0 ? Math.max(...tenantData.map(r => r.id)) + 1 : 1;
     setTenantData([...tenantData, { id: newId, shopName: '', productType: '', bestSeller: '', rentCost: '' }]);
   };
 
-  const removeRecord = (id: number) => {
-    setTenantData(tenantData.filter(r => r.id !== id));
-  };
+  const removeRecord = (id: number) => setTenantData(tenantData.filter(r => r.id !== id));
 
-  const handleRecordChange = (id: number, field: keyof TenantRecord, value: string) => {
-    setTenantData(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r));
-  };
-
-  // CONVERSION HELPERS
   const getDateValue = (dateStr: string) => {
       if (!dateStr) return '';
       const [day, month, year] = dateStr.split('/');
       return `${year}-${month}-${day}`;
   };
   const handleDateChange = (val: string) => {
-      if (!val) {
-          setSurveyDate('');
-          return;
-      }
+      if (!val) { setSurveyDate(''); return; }
       const [year, month, day] = val.split('-');
       setSurveyDate(`${day}/${month}/${year}`);
   };
-
-  const getTimeValue = (timeStr: string) => {
-      if (!timeStr) return '';
-      return timeStr.replace('.', ':');
-  };
-  const handleTimeChange = (val: string) => {
-      setSurveyTime(val.replace(':', '.'));
-  };
+  const getTimeValue = (timeStr: string) => (timeStr ? timeStr.replace('.', ':') : '');
+  const handleTimeChange = (val: string) => setSurveyTime(val.replace(':', '.'));
 
   return (
-    <div className="flex flex-col relative font-sans bg-white/60 backdrop-blur-xl rounded-[2.5rem] border border-white/60 shadow-2xl overflow-hidden transition-all duration-500">
-      
-      {/* HEADER */}
+    <div className="flex flex-col relative font-sans bg-white/60 backdrop-blur-xl rounded-[2.5rem] border border-white/60 shadow-2xl overflow-hidden animate-fade-in-up">
       <div className="relative z-20 bg-white/40 backdrop-blur-lg border-b border-white/50 px-8 py-6">
          <div className="flex items-center justify-between gap-6 mb-8">
              <div className="flex items-center gap-6">
-                 <button onClick={onBack} className="p-3 rounded-2xl hover:bg-white text-gray-500 hover:text-[#064E3B] transition-all border border-transparent hover:border-gray-200 shadow-sm"><ArrowLeft size={22} /></button>
+                 <button onClick={onBack} className="p-3 rounded-2xl hover:bg-white text-gray-500 hover:text-[#064E3B] transition-all border border-transparent hover:border-gray-200"><ArrowLeft size={22} /></button>
                  <div className="flex items-center gap-5">
                     <div className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg shadow-[#064E3B]/20 bg-gradient-to-br from-[#064E3B] to-[#042f24] text-white ring-4 ring-white/50">
                         <Store size={32} strokeWidth={1.5} />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-[#064E3B] leading-none tracking-tight font-playfair mb-1.5">Potensi Ekonomi (Tenant)</h1>
-                        <p className="text-[11px] font-bold text-[#D4AF37] uppercase tracking-widest bg-[#D4AF37]/10 inline-block px-2 py-0.5 rounded-md border border-[#D4AF37]/20">Data Toko & Sewa</p>
+                        <h1 className="text-2xl font-bold text-[#064E3B] font-playfair leading-tight">Potensi Ekonomi (Tenant)</h1>
+                        <p className="text-[10px] font-bold text-[#D4AF37] uppercase tracking-widest bg-[#D4AF37]/10 inline-block px-2 py-0.5 rounded border border-[#D4AF37]/20">Survei Hotel & Toko</p>
                     </div>
                  </div>
              </div>
-             <button onClick={onBack} className="flex items-center gap-2 px-6 py-3 bg-[#064E3B] hover:bg-[#053d2e] text-white rounded-xl shadow-lg shadow-[#064E3B]/20 text-sm font-bold transition-all transform hover:translate-y-[-2px] hover:shadow-xl">
-                <Save size={18} /> <span>Simpan Data</span>
-             </button>
+             <button onClick={onBack} className="flex items-center gap-2 px-6 py-3 bg-[#064E3B] text-white rounded-xl shadow-lg text-sm font-bold hover:scale-105 transition-all"><Save size={18} /> Simpan</button>
          </div>
 
-         {/* Identity Panel (A. Identitas Lokasi) */}
          <div className="bg-white/40 backdrop-blur-md border border-white/60 rounded-3xl p-8 shadow-sm">
               <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200/50">
                 <div className="p-2 bg-[#064E3B]/10 rounded-xl"><FileText size={18} className="text-[#064E3B]" /></div>
@@ -86,75 +68,37 @@ export const TenantForm: React.FC<TenantFormProps> = ({ onBack }) => {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <PremiumInput label="1. Nama Hotel" icon={Building} value={hotelName} onChange={setHotelName} placeholder="Nama Hotel..." />
-                  <PremiumInput label="2. Lokasi / Area" icon={MapPin} value={location} onChange={setLocation} placeholder="Lokasi/Lantai..." />
-                  <PremiumInput label="3. Penanggung Jawab" icon={User} value={pic} onChange={setPic} placeholder="Nama PIC Tenant..." />
-                  <PremiumInput label="4. Tanggal Survei" icon={Calendar} type="date" value={getDateValue(surveyDate)} onChange={handleDateChange} />
-                  <PremiumInput label="5. Waktu Survei" icon={Clock} type="time" value={getTimeValue(surveyTime)} onChange={handleTimeChange} />
-                  <PremiumInput label="6. Petugas Survei" icon={User} value={surveyor} onChange={setSurveyor} placeholder="Nama Petugas..." />
-              </div>
-              <div className="mt-6 pt-4 border-t border-gray-200/50 flex justify-end">
-                 <button onClick={addRecord} className="px-6 py-3 bg-white border border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-white rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow-lg hover:-translate-y-0.5">
-                    <Plus size={16} /> Tambah Toko
-                 </button>
+                  <PremiumInput label="2. Alamat" icon={MapPin} value={address} onChange={setAddress} placeholder="Alamat..." />
+                  <PremiumInput label="3. Sektor" icon={Layers} value={sector} onChange={setSector} placeholder="Sektor..." />
+                  <PremiumInput label="4. Petugas Survei" icon={User} value={surveyor} onChange={setSurveyor} placeholder="Nama Petugas..." />
+                  <PremiumInput label="5. Tanggal Survei" icon={Calendar} type="date" value={getDateValue(surveyDate)} onChange={handleDateChange} />
+                  <PremiumInput label="6. Waktu Survei" icon={Clock} type="time" value={getTimeValue(surveyTime)} onChange={handleTimeChange} />
               </div>
          </div>
       </div>
 
-      {/* GRID CONTENT - 2 Columns */}
-      <div className="p-8 z-10">
+      <div className="p-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-10">
             {tenantData.map((record, idx) => (
-                <div key={record.id} className="relative bg-white rounded-3xl shadow-[0_4px_25px_rgba(0,0,0,0.03)] border border-gray-100 hover:shadow-[0_10px_40px_rgba(6,78,59,0.1)] hover:border-[#064E3B]/30 transition-all duration-300 overflow-hidden group/card">
-                   {/* Gold Strip */}
-                   <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#D4AF37]"></div>
-
-                   <button onClick={() => removeRecord(record.id)} className="absolute top-4 right-4 text-gray-300 hover:text-red-500 hover:bg-red-50 p-2 rounded-xl transition-all opacity-0 group-hover/card:opacity-100"><Trash2 size={16} /></button>
-                   
-                   <div className="pl-8 pr-6 py-6 space-y-6">
-                       <div className="flex items-center gap-4">
-                           <span className="h-10 w-10 rounded-xl bg-[#064E3B]/10 flex items-center justify-center text-[#064E3B] font-bold text-sm border border-[#064E3B]/20 shadow-sm">#{idx + 1}</span>
-                           <div className="flex flex-col">
-                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Entry Data</span>
-                                <span className="text-base font-bold text-gray-800 font-playfair">Informasi Tenant</span>
-                            </div>
+                <div key={record.id} className="relative bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-xl transition-all group">
+                   <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#D4AF37] rounded-l-3xl"></div>
+                   <button onClick={() => removeRecord(record.id)} className="absolute top-4 right-4 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all bg-red-50 p-2 rounded-lg"><Trash2 size={16} /></button>
+                   <div className="flex items-center gap-3 mb-6 pl-2">
+                       <span className="text-xs font-bold text-[#064E3B] bg-[#064E3B]/10 px-2.5 py-1.5 rounded-lg">Tenant #{idx + 1}</span>
+                   </div>
+                   <div className="space-y-4">
+                       <CardInput icon={Store} placeholder="Nama Toko / Tenant" value={record.shopName} onChange={(e: any) => handleRecordChange(record.id, 'shopName', e.target.value)} />
+                       <div className="grid grid-cols-2 gap-4">
+                           <CardInput icon={Tag} placeholder="Jenis Produk" value={record.productType} onChange={(e: any) => handleRecordChange(record.id, 'productType', e.target.value)} />
+                           <CardInput icon={TrendingUp} placeholder="Produk Terlaris" value={record.bestSeller} onChange={(e: any) => handleRecordChange(record.id, 'bestSeller', e.target.value)} />
                        </div>
-                       
-                       <div className="space-y-2">
-                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Nama Toko / Tenant</label>
-                            <Input value={record.shopName} onChange={(e) => handleRecordChange(record.id, 'shopName', e.target.value)} 
-                                   className="!py-3.5 !text-sm !bg-gray-50/50 focus:!bg-white !border-gray-200 focus:!border-[#064E3B] !rounded-xl !font-bold" placeholder="Contoh: Toko Al-Madinah" />
-                       </div>
-                       
-                       <div className="space-y-2">
-                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1 flex items-center gap-1.5"><ShoppingBag size={12}/> Jenis Produk</label>
-                            <Input value={record.productType} onChange={(e) => handleRecordChange(record.id, 'productType', e.target.value)} 
-                                   className="!py-3.5 !text-sm !bg-gray-50/50 focus:!bg-white !border-gray-200 focus:!border-[#064E3B] !rounded-xl" placeholder="Contoh: Pakaian, Makanan..." />
-                       </div>
-
-                       <div className="grid grid-cols-2 gap-5 pt-4 border-t border-dashed border-gray-200">
-                           <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1 flex items-center gap-1.5"><TrendingUp size={12}/> Produk Laris / Bestseller</label>
-                                <Input value={record.bestSeller} onChange={(e) => handleRecordChange(record.id, 'bestSeller', e.target.value)} 
-                                       className="!py-3 !text-sm !bg-gray-50/50 focus:!bg-white !border-gray-200 focus:!border-[#064E3B] !rounded-xl" placeholder="Item Terlaris..." />
-                           </div>
-                           <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1 flex items-center gap-1.5"><DollarSign size={12} className="text-[#D4AF37]"/> Biaya Sewa</label>
-                                <Input value={record.rentCost} onChange={(e) => handleRecordChange(record.id, 'rentCost', e.target.value)} 
-                                       className="!py-3 !text-sm !bg-[#D4AF37]/5 focus:!bg-white !border-[#D4AF37]/20 focus:!border-[#D4AF37] !rounded-xl !text-[#B45309] !font-bold" placeholder="0" />
-                           </div>
-                       </div>
+                       <CardInput icon={DollarSign} placeholder="Biaya Sewa (SAR)" type="number" value={record.rentCost} onChange={(e: any) => handleRecordChange(record.id, 'rentCost', e.target.value)} highlight />
                    </div>
                 </div>
             ))}
-            
-            <button 
-                onClick={addRecord}
-                className="flex flex-col items-center justify-center min-h-[350px] rounded-3xl border-2 border-dashed border-gray-300 bg-white/40 hover:bg-white/80 hover:border-[#064E3B] hover:shadow-xl transition-all duration-300 group"
-            >
-                <div className="w-16 h-16 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 mb-4 group-hover:scale-110 group-hover:bg-[#064E3B] group-hover:text-white group-hover:border-[#064E3B] transition-all shadow-sm">
-                    <Plus size={32} />
-                </div>
-                <span className="text-sm font-bold text-gray-500 group-hover:text-[#064E3B]">Tambah Tenant Baru</span>
+            <button onClick={addRecord} className="flex flex-col items-center justify-center min-h-[200px] border-2 border-dashed border-gray-200 rounded-3xl hover:bg-[#064E3B]/5 transition-all text-gray-400 font-bold gap-3 group">
+                <div className="w-14 h-14 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 shadow-sm group-hover:scale-110 transition-transform"><Plus size={24} /></div>
+                Tambah Tenant Baru
             </button>
         </div>
       </div>
@@ -163,18 +107,25 @@ export const TenantForm: React.FC<TenantFormProps> = ({ onBack }) => {
 };
 
 const PremiumInput = ({ label, icon: Icon, type = "text", value, onChange, placeholder }: any) => (
-    <div className="flex flex-col gap-2 group">
-        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2 group-focus-within:text-[#064E3B] transition-colors">
-            <Icon size={12} className="text-gray-400 group-focus-within:text-[#D4AF37] transition-colors" /> {label}
-        </label>
-        <div className="relative">
-            <input 
-                type={type} 
-                value={value} 
-                onChange={(e) => onChange(e.target.value)} 
-                className="w-full text-sm font-semibold text-gray-700 bg-white/60 border border-gray-200 rounded-xl px-4 py-3.5 focus:bg-white focus:border-[#064E3B] focus:ring-4 focus:ring-[#064E3B]/5 outline-none transition-all shadow-sm placeholder:font-medium placeholder:text-gray-300 hover:border-gray-300 hover:bg-white/80" 
-                placeholder={placeholder} 
-            />
+  <div className="flex flex-col gap-2 group">
+    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2 group-focus-within:text-[#064E3B] transition-colors">
+      <Icon size={12} className="text-gray-300 group-focus-within:text-[#D4AF37] transition-colors" /> {label}
+    </label>
+    <input type={type} value={value} onChange={e => onChange(e.target.value)} className="w-full text-sm font-semibold text-gray-700 bg-white/60 border border-gray-200 rounded-xl px-4 py-3.5 focus:bg-white focus:border-[#064E3B] focus:ring-4 focus:ring-[#064E3B]/5 outline-none transition-all placeholder:text-gray-300" placeholder={placeholder} />
+  </div>
+);
+
+const CardInput = ({ icon: Icon, value, onChange, placeholder, type = "text", highlight = false }: any) => (
+    <div className="relative group/input">
+        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within/input:text-[#064E3B] transition-colors">
+            <Icon size={16} className={highlight ? 'text-[#D4AF37]' : ''} />
         </div>
+        <input 
+            type={type} 
+            value={value} 
+            onChange={onChange} 
+            placeholder={placeholder}
+            className={`w-full bg-gray-50/50 border border-gray-100 rounded-xl py-3 pl-10 text-sm font-semibold text-gray-700 focus:bg-white focus:border-[#064E3B] focus:ring-2 focus:ring-[#064E3B]/10 outline-none transition-all placeholder:text-gray-300 ${highlight ? 'text-[#064E3B]' : ''}`}
+        />
     </div>
 );

@@ -10,6 +10,7 @@ import { RTEForm } from './pages/forms/RTEForm';
 import { TenantForm } from './pages/forms/TenantForm';
 import { ExpeditionForm } from './pages/forms/ExpeditionForm';
 import { TelecomForm } from './pages/forms/TelecomForm';
+import { RiceForm } from './pages/forms/RiceForm';
 import { Page } from './types';
 import { GlassCard } from './components/GlassCard';
 import { Construction, Clock, ArrowLeft } from 'lucide-react';
@@ -62,7 +63,6 @@ const AppContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>(Page.LOGIN);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Automatically scroll to top when page changes
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [currentPage]);
@@ -91,6 +91,8 @@ const AppContent: React.FC = () => {
         return <Visualization />;
       case Page.FORM_BUMBU:
         return <SpiceForm onBack={navigateToPortal} />;
+      case Page.FORM_RICE:
+        return <RiceForm onBack={navigateToPortal} />;
       case Page.FORM_RTE:
         return <RTEForm onBack={navigateToPortal} />;
       case Page.FORM_TENANT:
@@ -106,16 +108,10 @@ const AppContent: React.FC = () => {
     }
   };
 
-  if (!isAuthenticated) {
-    return <Login onLogin={handleLogin} />;
-  }
+  if (!isAuthenticated) return <Login onLogin={handleLogin} />;
 
   return (
-    <Layout 
-      currentPage={currentPage} 
-      onNavigate={setCurrentPage} 
-      onLogout={handleLogout}
-    >
+    <Layout currentPage={currentPage} onNavigate={setCurrentPage} onLogout={handleLogout}>
       {renderContent()}
     </Layout>
   );

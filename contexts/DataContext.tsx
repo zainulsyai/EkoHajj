@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { BumbuRecord, RTERecord, TenantRecord, ExpeditionRecord, TelecomRecord } from '../types';
+import { BumbuRecord, RTERecord, TenantRecord, ExpeditionRecord, TelecomRecord, RiceRecord } from '../types';
 
 interface DataContextType {
   bumbuMakkah: BumbuRecord[];
@@ -14,6 +14,8 @@ interface DataContextType {
   setExpeditionData: React.Dispatch<React.SetStateAction<ExpeditionRecord[]>>;
   telecomData: TelecomRecord[];
   setTelecomData: React.Dispatch<React.SetStateAction<TelecomRecord[]>>;
+  riceData: RiceRecord[];
+  setRiceData: React.Dispatch<React.SetStateAction<RiceRecord[]>>;
   telecomActive: Record<number, boolean>;
   setTelecomActive: React.Dispatch<React.SetStateAction<Record<number, boolean>>>;
   isLoading: boolean;
@@ -21,136 +23,128 @@ interface DataContextType {
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
-const initialBumbuNames = [
-  'Bumbu Nasi Kuning', 'Bumbu Gulai', 'Bumbu Tongseng', 'Bumbu Nasi Goreng',
-  'Bumbu Opor', 'Bumbu Bistik/Teriyaki', 'Bumbu Nasi Goreng Kampung', 'Bumbu Kecap',
-  'Bumbu Gepuk', 'Bumbu Krengsengan', 'Bumbu Nasi Uduk', 'Bumbu Woku',
-  'Bumbu Balado', 'Bumbu Rica', 'Bumbu Semur', 'Bumbu Rajang',
-  'Bumbu Bali', 'Bumbu Saus Tiram', 'Bumbu Tumis', 'Bumbu Lada Hitam',
-  'Bumbu Saus Mentega', 'Bumbu Asam Manis', 'Bumbu Rujak', 'Bumbu Rendang',
-  'Bumbu Kuning', 'Bumbu Dabu-Dabu', 'Bumbu Pesmol', 'Bumbu Habang'
+// --- PDF Page 1-3 Data Source ---
+const bumbuSource = [
+  { company: 'PT. Halalan Thayyiban Indonesia (HTI)', name: 'Bumbu Nasi Kuning' },
+  { company: 'PT. Foodindo Dwivestama', name: 'Bumbu Gulai' },
+  { company: 'PT. Pangansari Utama Food', name: 'Bumbu Tongseng' },
+  { company: 'PT. Laukita Bersama Indonesia', name: 'Bumbu Nasi Goreng' },
+  { company: 'PT. Alnusakon Era Laju', name: 'Bumbu Opor' },
+  { company: 'PT. Sekar Laut', name: 'Bumbu Bistik/Teriyaki' },
+  { company: 'PT. Foodex Inti Ingredients', name: 'Bumbu Nasi Goreng Kampung' },
+  { company: 'PT. Ikafood Putramas', name: 'Bumbu Kecap' },
+  { company: 'PT. Niaga Citra Mandiri', name: 'Bumbu Gepuk' },
+  { company: 'PT. Berkah Abadi Pangan', name: 'Bumbu Krengsengan' },
+  { company: '', name: 'Bumbu Nasi Uduk' },
+  { company: '', name: 'Bumbu Woku' },
+  { company: '', name: 'Bumbu Balado' },
+  { company: '', name: 'Bumbu Rica' },
+  { company: '', name: 'Bumbu Semur' },
+  { company: '', name: 'Bumbu Rajang' },
+  { company: '', name: 'Bumbu Bali' },
+  { company: '', name: 'Bumbu Saus Tiram' },
+  { company: '', name: 'Bumbu Tumis' },
+  { company: '', name: 'Bumbu Lada Hitam' },
+  { company: '', name: 'Bumbu Saus Mentega' },
+  { company: '', name: 'Bumbu Asam Manis' },
+  { company: '', name: 'Bumbu Rujak' },
+  { company: '', name: 'Bumbu Rendang' },
+  { company: '', name: 'Bumbu Kuning' },
+  { company: '', name: 'Bumbu Dabu-Dabu' },
+  { company: '', name: 'Bumbu Pesmol' },
+  { company: '', name: 'Bumbu Habang' }
 ];
 
-// Helper to generate data with ONLY ONE example (index 0)
-const generateBumbu = (location: string) => initialBumbuNames.map((name, index) => {
-    const isExample = index === 0; // Only the first item has data
-    
-    return {
-        id: index,
-        name,
-        isUsed: isExample, 
-        volume: isExample ? '10.5' : '',
-        price: isExample ? '2500' : '',
-        otherIngredients: '',
-        originProduct: isExample ? 'Indofood' : '',
-        productPrice: isExample ? '150' : '',
-        // Metadata - Filled only for the example to show format
-        companyName: isExample ? (location === 'Makkah' ? 'PT. Catering Makkah Sejahtera' : 'CV. Madinah Berkah') : '',
-        kitchenName: isExample ? (location === 'Makkah' ? 'Dapur Al-Haram Sektor 1' : 'Dapur Madinah Al-Munawwarah') : '',
-        address: isExample ? (location === 'Makkah' ? 'Jl. King Abdul Aziz No. 12' : 'Jl. King Fahd No. 88') : '',
-        pic: isExample ? (location === 'Makkah' ? 'Abdullah' : 'Yusuf') : '',
-        surveyor: isExample ? 'Ahmad Faisal' : '',
-        date: isExample ? '15/06/2026' : '',
-        time: isExample ? '09.00' : ''
-    };
-});
+// --- PDF Page 7-8 Data Source ---
+const rteSource = [
+  { company: 'PT. Halalan Thayyiban Indonesia (HTI)', menu: 'Nasi, Rendang Daging, Kacang Merah' },
+  { company: 'PT. Family Food Indonesia', menu: 'Nasi, Bumbu Daging Balado, Wortel dan kentang' },
+  { company: 'PT. Berkat Pangan Abadi', menu: 'Nasi, Sayur, Semur Ayam, Kacang Merah' },
+  { company: 'PT. Laukita Bersama Indonesia (Umara)', menu: 'Nasi, Kari Ayam, Kentang' },
+  { company: 'PT. Foodex inti Ingredients', menu: 'Nasi, Gulai Ayam, Wortel, Kentang' },
+  { company: 'PT. Indo Niara Agro (Inagro)', menu: 'Nasi, Daging Bumbu lada hitam, Kacang Merah' },
+  { company: 'PT. Adipura Mandiri Indotama', menu: '' },
+  { company: 'PT. Jakarana Tama', menu: '' },
+  { company: 'PT. Pangansari Utama Food Distribution', menu: '' },
+  { company: 'PT Kokikit Indonesia Teknologi', menu: '' },
+];
 
 export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initial Data Mocking
   const [bumbuMakkah, setBumbuMakkah] = useState<BumbuRecord[]>([]);
   const [bumbuMadinah, setBumbuMadinah] = useState<BumbuRecord[]>([]);
   const [rteData, setRteData] = useState<RTERecord[]>([]);
   const [tenantData, setTenantData] = useState<TenantRecord[]>([]);
   const [expeditionData, setExpeditionData] = useState<ExpeditionRecord[]>([]);
   const [telecomData, setTelecomData] = useState<TelecomRecord[]>([]);
+  const [riceData, setRiceData] = useState<RiceRecord[]>([]);
   const [telecomActive, setTelecomActive] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
-    // Simulate API fetch delay
     const timer = setTimeout(() => {
-        // 1. Bumbu: List all names, but only fill the first one
-        setBumbuMakkah(generateBumbu('Makkah'));
-        setBumbuMadinah(generateBumbu('Madinah'));
+        // 1. Initialize Bumbu (Exact list from PDF)
+        const mapBumbu = (list: typeof bumbuSource) => list.map((item, idx) => ({
+            id: idx + 1,
+            name: item.name,
+            companyName: item.company, // Pre-filled company from PDF
+            isUsed: false, 
+            volume: '',
+            price: '',
+            otherIngredients: '',
+            originProduct: '',
+            productPrice: ''
+        }));
+        setBumbuMakkah(mapBumbu(bumbuSource));
+        setBumbuMadinah(mapBumbu(bumbuSource));
 
-        // 2. RTE: Single Example
-        setRteData([
-            { 
-                id: 1, 
-                companyName: 'PT. Halalan Thayyiban Indonesia', 
-                spiceType: 'Rendang Daging', 
-                isUsed: true, 
-                volume: '15000', 
-                price: '25000', 
-                kitchenName: 'Dapur Sektor 3', 
-                address: 'Aziziah South', 
-                pic: 'Mr. Hamzah', 
-                surveyor: 'Siti Aminah', 
-                date: '14/06/2026', 
-                time: '14.30' 
-            }
-        ]);
+        // 2. Initialize RTE (Exact list from PDF)
+        const mappedRTE = rteSource.map((item, idx) => ({
+            id: idx + 1, 
+            companyName: item.company, 
+            spiceType: item.menu, 
+            isUsed: false, 
+            volume: '', 
+            price: '' 
+        }));
+        setRteData(mappedRTE);
 
-        // 3. Tenant: Single Example
+        // 3. Initialize Tenant (Empty rows for survey)
         setTenantData([
-            { 
-                id: 1, 
-                shopName: 'Toko Al-Barakah', 
-                productType: 'Oleh-oleh', 
-                bestSeller: 'Kurma Ajwa', 
-                rentCost: '15000', 
-                hotelName: 'Hotel Al-Kiswah', 
-                location: 'Lobby Tower 1', 
-                pic: 'Ahmed', 
-                surveyor: 'Dewi Sartika', 
-                date: '10/06/2026', 
-                time: '16.00' 
-            }
+            { id: 1, shopName: '', productType: '', bestSeller: '', rentCost: '' },
+            { id: 2, shopName: '', productType: '', bestSeller: '', rentCost: '' }
         ]);
 
-        // 4. Expedition: Single Example
+        // 4. Initialize Expedition (Empty rows for survey)
         setExpeditionData([
-            { 
-                id: 1, 
-                companyName: 'Garuda Cargo', 
-                pricePerKg: '25', 
-                weight: '2400', 
-                hotelName: 'Hotel 101', 
-                location: 'Lobby Area', 
-                pic: 'Bambang', 
-                surveyor: 'Ahmad Faisal', 
-                date: '13/06/2026', 
-                time: '09.00' 
-            }
+            { id: 1, companyName: '', pricePerKg: '', weight: '' },
+            { id: 2, companyName: '', pricePerKg: '', weight: '' }
         ]);
 
-        // 5. Telecom: List Providers, but only fill details for the first one
-        const providers = [
-            'Telkomsel', 'Indosat Ooredoo', 'XL Axiata', 'Smartfren', 'Tri (3)', 'AXIS'
-        ];
-        
-        const initialTelecoms = providers.map((name, idx) => {
-            const isExample = idx === 0;
-            return {
-                id: idx + 1,
-                providerName: name,
-                roamingPackage: isExample ? 'Paket Haji 30 Hari' : '',
-                respondentName: isExample ? 'H. Abdullah' : '',
-                kloter: isExample ? 'JKG-01' : '',
-                embarkation: isExample ? 'Jakarta' : '',
-                province: isExample ? 'DKI Jakarta' : '',
-                surveyor: isExample ? 'Budi Santoso' : '',
-                date: '14/06/2026', 
-                time: '08.15' 
-            };
-        });
+        // 5. Initialize Rice (Bulog Premium as No 1)
+        setRiceData([
+            { id: 1, companyName: 'Bulog', riceType: 'Premium', isUsed: true, volume: '', price: '', otherRice: '', originProduct: '', productPrice: '' },
+            { id: 2, companyName: '', riceType: '', isUsed: false, volume: '', price: '', otherRice: '', originProduct: '', productPrice: '' },
+            { id: 3, companyName: '', riceType: '', isUsed: false, volume: '', price: '', otherRice: '', originProduct: '', productPrice: '' }
+        ]);
 
-        setTelecomData(initialTelecoms);
-        setTelecomActive({ 1: true }); // Only first one active
+        // 6. Initialize Telecom
+        const providers = ['Telkomsel', 'Indosat Ooredoo', 'XL Axiata', 'Smartfren', 'Tri (3)', 'AXIS'];
+        setTelecomData(providers.map((name, idx) => ({ 
+            id: idx + 1, 
+            providerName: name, 
+            roamingPackage: '',
+            respondentName: '',
+            kloter: '',
+            embarkation: '',
+            province: '',
+            surveyor: '',
+            date: '',
+            time: ''
+        })));
         
         setIsLoading(false);
-    }, 1500);
+    }, 1000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -163,6 +157,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       tenantData, setTenantData,
       expeditionData, setExpeditionData,
       telecomData, setTelecomData,
+      riceData, setRiceData,
       telecomActive, setTelecomActive,
       isLoading
     }}>
@@ -173,8 +168,6 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
 export const useData = () => {
   const context = useContext(DataContext);
-  if (context === undefined) {
-    throw new Error('useData must be used within a DataProvider');
-  }
+  if (context === undefined) throw new Error('useData must be used within a DataProvider');
   return context;
 };

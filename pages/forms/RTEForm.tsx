@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Input } from '../../components/InputFields';
-import { Save, Plus, Trash2, ArrowLeft, UtensilsCrossed, MapPin, User, Calendar, Box, DollarSign, Clock, FileText, Building2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Toggle } from '../../components/InputFields';
+import { Save, Plus, Trash2, ArrowLeft, UtensilsCrossed, MapPin, User, Calendar, Box, DollarSign, Clock, FileText, Building2, Building, ChefHat, Users } from 'lucide-react';
 import { RTERecord } from '../../types';
 import { useData } from '../../contexts/DataContext';
 
@@ -11,180 +11,101 @@ interface RTEFormProps {
 export const RTEForm: React.FC<RTEFormProps> = ({ onBack }) => {
   const { rteData, setRteData } = useData();
   
-  // Identity State - No longer pre-filled
-  const [companyName, setCompanyName] = useState('');
   const [kitchenName, setKitchenName] = useState(''); 
   const [address, setAddress] = useState(''); 
-  const [pic, setPic] = useState(''); 
+  const [hotelName, setHotelName] = useState('');
+  const [hotelNumber, setHotelNumber] = useState('');
+  const [kloterName, setKloterName] = useState('');
   const [monitorDate, setMonitorDate] = useState(''); 
   const [monitorTime, setMonitorTime] = useState(''); 
   const [officer, setOfficer] = useState(''); 
-
-  const updateAllRecords = (field: keyof RTERecord, value: string) => {
-      setRteData(prev => prev.map(r => ({ ...r, [field]: value })));
-  };
-
-  // Handlers for Identity Inputs
-  const handleCompanyChange = (val: string) => { setCompanyName(val); updateAllRecords('companyName', val); };
-  const handleKitchenChange = (val: string) => { setKitchenName(val); updateAllRecords('kitchenName', val); };
-  const handleAddressChange = (val: string) => { setAddress(val); updateAllRecords('address', val); };
-  const handlePicChange = (val: string) => { setPic(val); updateAllRecords('pic', val); };
-  const handleOfficerChange = (val: string) => { setOfficer(val); updateAllRecords('surveyor', val); };
-
-  // CONVERSION HELPERS
-  const getDateValue = (dateStr: string) => {
-      if (!dateStr) return '';
-      const [day, month, year] = dateStr.split('/');
-      return `${year}-${month}-${day}`;
-  };
-  const handleDateChange = (val: string) => {
-      if (!val) {
-          setMonitorDate('');
-          updateAllRecords('date', '');
-          return;
-      }
-      const [year, month, day] = val.split('-');
-      const formatted = `${day}/${month}/${year}`;
-      setMonitorDate(formatted);
-      updateAllRecords('date', formatted);
-  };
-
-  const getTimeValue = (timeStr: string) => {
-      if (!timeStr) return '';
-      return timeStr.replace('.', ':');
-  };
-  const handleTimeChange = (val: string) => {
-      const formatted = val.replace(':', '.');
-      setMonitorTime(formatted);
-      updateAllRecords('time', formatted);
-  };
-
-  const addRecord = () => {
-      const newId = rteData.length > 0 ? Math.max(...rteData.map(r => r.id)) + 1 : 1;
-      setRteData([...rteData, { 
-          id: newId, 
-          companyName, 
-          spiceType: '', 
-          isUsed: true, 
-          volume: '', 
-          price: '',
-          kitchenName,
-          address,
-          pic,
-          date: monitorDate,
-          time: monitorTime,
-          surveyor: officer
-      }]);
-  };
-
-  const removeRecord = (id: number) => {
-      setRteData(rteData.filter(r => r.id !== id));
-  };
 
   const handleRecordChange = (id: number, field: keyof RTERecord, value: any) => {
       setRteData(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r));
   };
 
+  const addRecord = () => {
+      const newId = rteData.length > 0 ? Math.max(...rteData.map(r => r.id)) + 1 : 1;
+      setRteData([...rteData, { id: newId, companyName: '', spiceType: '', isUsed: false, volume: '', price: '' }]);
+  };
+
+  const removeRecord = (id: number) => setRteData(rteData.filter(r => r.id !== id));
+
+  const getDateValue = (dateStr: string) => {
+    if (!dateStr) return '';
+    const [day, month, year] = dateStr.split('/');
+    return `${year}-${month}-${day}`;
+  };
+  const handleDateChange = (val: string) => {
+      if (!val) { setMonitorDate(''); return; }
+      const [year, month, day] = val.split('-');
+      setMonitorDate(`${day}/${month}/${year}`);
+  };
+  const getTimeValue = (timeStr: string) => (timeStr ? timeStr.replace('.', ':') : '');
+  const handleTimeChange = (val: string) => setMonitorTime(val.replace(':', '.'));
+
   return (
-    <div className="flex flex-col relative font-sans bg-white/60 backdrop-blur-xl rounded-[2.5rem] border border-white/60 shadow-2xl overflow-hidden transition-all duration-500">
-      
-      {/* HEADER */}
+    <div className="flex flex-col relative font-sans bg-white/60 backdrop-blur-xl rounded-[2.5rem] border border-white/60 shadow-2xl overflow-hidden animate-fade-in-up">
       <div className="relative z-20 bg-white/40 backdrop-blur-lg border-b border-white/50 px-8 py-6">
          <div className="flex items-center justify-between gap-6 mb-8">
              <div className="flex items-center gap-6">
-                 <button onClick={onBack} className="p-3 rounded-2xl hover:bg-white text-gray-500 hover:text-[#064E3B] transition-all border border-transparent hover:border-gray-200 shadow-sm"><ArrowLeft size={22} /></button>
+                 <button onClick={onBack} className="p-3 rounded-2xl hover:bg-white text-gray-500 hover:text-[#064E3B] transition-all border border-transparent hover:border-gray-200"><ArrowLeft size={22} /></button>
                  <div className="flex items-center gap-5">
                     <div className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg shadow-[#064E3B]/20 bg-gradient-to-br from-[#064E3B] to-[#042f24] text-white ring-4 ring-white/50">
                         <UtensilsCrossed size={32} strokeWidth={1.5} />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-[#064E3B] leading-none tracking-tight font-playfair mb-1.5">Makanan Siap Saji (RTE)</h1>
-                        <p className="text-[11px] font-bold text-[#D4AF37] uppercase tracking-widest bg-[#D4AF37]/10 inline-block px-2 py-0.5 rounded-md border border-[#D4AF37]/20">Perusahaan Penyedia</p>
+                        <h1 className="text-2xl font-bold text-[#064E3B] font-playfair leading-tight">Makanan Siap Saji (RTE)</h1>
+                        <p className="text-[10px] font-bold text-[#D4AF37] uppercase tracking-widest bg-[#D4AF37]/10 inline-block px-2 py-0.5 rounded border border-[#D4AF37]/20">Makkah Monitoring</p>
                     </div>
                  </div>
              </div>
-             <button onClick={onBack} className="flex items-center gap-2 px-6 py-3 bg-[#064E3B] hover:bg-[#053d2e] text-white rounded-xl shadow-lg shadow-[#064E3B]/20 text-sm font-bold transition-all transform hover:translate-y-[-2px] hover:shadow-xl">
-                <Save size={18} /> <span>Simpan Data</span>
-             </button>
+             <button onClick={onBack} className="flex items-center gap-2 px-6 py-3 bg-[#064E3B] text-white rounded-xl shadow-lg text-sm font-bold hover:scale-105 transition-all"><Save size={18} /> Simpan</button>
          </div>
 
-         {/* Identity Panel (A. Identitas Lokasi) */}
          <div className="bg-white/40 backdrop-blur-md border border-white/60 rounded-3xl p-8 shadow-sm">
              <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200/50">
                 <div className="p-2 bg-[#064E3B]/10 rounded-xl"><FileText size={18} className="text-[#064E3B]" /></div>
                 <h3 className="text-sm font-bold text-gray-800 uppercase tracking-widest">A. Identitas Lokasi & Petugas</h3>
              </div>
-             
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <PremiumInput label="1. Nama Dapur" icon={MapPin} value={kitchenName} onChange={handleKitchenChange} placeholder="Isi nama dapur..." />
-                  <PremiumInput label="2. Alamat" icon={MapPin} value={address} onChange={handleAddressChange} placeholder="Isi alamat..." />
-                  <PremiumInput label="3. Penanggung Jawab Dapur" icon={User} value={pic} onChange={handlePicChange} placeholder="Isi nama PIC..." />
-                  <PremiumInput label="4. Tanggal Monitoring" icon={Calendar} type="date" value={getDateValue(monitorDate)} onChange={handleDateChange} />
-                  <PremiumInput label="5. Waktu Monitoring" icon={Clock} type="time" value={getTimeValue(monitorTime)} onChange={handleTimeChange} />
-                  <PremiumInput label="6. Petugas Survei" icon={User} value={officer} onChange={handleOfficerChange} placeholder="Isi nama petugas..." />
-             </div>
-             
-             {/* Bottom Row: Company Name & Add Button */}
-             <div className="mt-6 pt-6 border-t border-gray-200/50 flex flex-col md:flex-row md:items-end gap-5">
-                <div className="flex-1">
-                    <PremiumInput label="Nama Perusahaan" icon={Building2} value={companyName} onChange={handleCompanyChange} placeholder="Isi nama perusahaan penyedia..." />
-                </div>
-                <button onClick={addRecord} className="mb-0.5 px-6 py-3.5 bg-white border border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-white rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow-lg hover:-translate-y-0.5 whitespace-nowrap">
-                    <Plus size={18} /> Tambah Menu / Jenis Bumbu
-                </button>
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <PremiumInput label="1. Nama Dapur" icon={MapPin} value={kitchenName} onChange={setKitchenName} placeholder="Nama Dapur..." />
+                  <PremiumInput label="2. Alamat" icon={MapPin} value={address} onChange={setAddress} placeholder="Alamat..." />
+                  <PremiumInput label="3. Nama Hotel" icon={Building} value={hotelName} onChange={setHotelName} placeholder="Nama Hotel..." />
+                  <PremiumInput label="4. Nomor Hotel" icon={Building2} value={hotelNumber} onChange={setHotelNumber} placeholder="No. Hotel..." />
+                  <PremiumInput label="5. Nama Kloter" icon={Users} value={kloterName} onChange={setKloterName} placeholder="Kloter..." />
+                  <PremiumInput label="6. Tanggal Monitoring" icon={Calendar} type="date" value={getDateValue(monitorDate)} onChange={handleDateChange} />
+                  <PremiumInput label="7. Waktu Monitoring" icon={Clock} type="time" value={getTimeValue(monitorTime)} onChange={handleTimeChange} />
+                  <PremiumInput label="8. Petugas" icon={User} value={officer} onChange={setOfficer} placeholder="Nama Petugas..." />
              </div>
          </div>
       </div>
 
-      {/* GRID CONTENT - 2 Columns */}
-      <div className="p-8 z-10">
+      <div className="p-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-10">
             {rteData.map((record, idx) => (
-                <div key={record.id} className="relative bg-white rounded-3xl shadow-[0_4px_25px_rgba(0,0,0,0.03)] border border-gray-100 hover:shadow-[0_10px_40px_rgba(6,78,59,0.1)] hover:border-[#064E3B]/30 transition-all duration-300 overflow-hidden group/card">
-                   {/* Gold Strip for RTE Distinction */}
-                   <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-[#D4AF37] to-[#FBBF24]"></div>
-                   
-                   <button onClick={() => removeRecord(record.id)} className="absolute top-4 right-4 text-gray-300 hover:text-red-500 hover:bg-red-50 p-2 rounded-xl transition-all opacity-0 group-hover/card:opacity-100"><Trash2 size={16} /></button>
-                   
-                   <div className="pl-8 pr-6 py-6 space-y-6">
-                       <div className="flex items-center gap-4">
-                            <span className="h-10 w-10 rounded-xl bg-[#064E3B]/10 flex items-center justify-center text-[#064E3B] font-bold text-sm border border-[#064E3B]/20 shadow-sm">#{idx + 1}</span>
-                            <div className="flex flex-col">
-                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Entry Data</span>
-                                <span className="text-base font-bold text-gray-800 font-playfair">Detail Menu</span>
-                            </div>
+                <div key={record.id} className="relative bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-xl transition-all group">
+                   <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#D4AF37] rounded-l-3xl"></div>
+                   <button onClick={() => removeRecord(record.id)} className="absolute top-4 right-4 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all bg-red-50 p-2 rounded-lg"><Trash2 size={16} /></button>
+                   <div className="flex justify-between items-center mb-6 pl-2">
+                       <span className="text-xs font-bold text-[#064E3B] bg-[#064E3B]/10 px-2.5 py-1.5 rounded-lg">Entry #{idx + 1}</span>
+                       <div className="mr-8">
+                            <Toggle checked={record.isUsed} onChange={(v) => handleRecordChange(record.id, 'isUsed', v)} label="Aktif" />
                        </div>
-                       
-                       <div className="space-y-2">
-                           <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Jenis Bumbu / Menu</label>
-                           <Input value={record.spiceType} onChange={(e) => handleRecordChange(record.id, 'spiceType', e.target.value)} 
-                                  className="!py-3.5 !text-sm !bg-gray-50/50 focus:!bg-white !border-gray-200 focus:!border-[#064E3B] !rounded-xl" placeholder="Contoh: Bumbu Nasi Kuning" />
-                       </div>
-
-                       <div className="grid grid-cols-2 gap-5 pt-4 border-t border-dashed border-gray-200">
-                           <div className="space-y-2">
-                               <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1 flex items-center gap-1.5"><Box size={12} className="text-[#D4AF37]"/> Volume/Ton</label>
-                               <Input value={record.volume} type="number" onChange={(e) => handleRecordChange(record.id, 'volume', e.target.value)} 
-                                      className="!py-3 !text-sm !bg-gray-50/50 focus:!bg-white !border-gray-200 focus:!border-[#064E3B] !rounded-xl" placeholder="0" />
-                           </div>
-                           <div className="space-y-2">
-                               <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1 flex items-center gap-1.5"><DollarSign size={12} className="text-[#D4AF37]"/> Harga</label>
-                               <Input value={record.price} onChange={(e) => handleRecordChange(record.id, 'price', e.target.value)} 
-                                      className="!py-3 !text-sm !bg-[#D4AF37]/5 focus:!bg-white !border-[#D4AF37]/20 focus:!border-[#D4AF37] !rounded-xl !text-[#B45309] !font-bold" placeholder="0" />
-                           </div>
+                   </div>
+                   <div className="space-y-4">
+                       <CardInput icon={Building2} placeholder="Nama Perusahaan" value={record.companyName} onChange={(e: any) => handleRecordChange(record.id, 'companyName', e.target.value)} />
+                       <CardInput icon={ChefHat} placeholder="Menu (Nasi, Lauk, Sayur)" value={record.spiceType} onChange={(e: any) => handleRecordChange(record.id, 'spiceType', e.target.value)} />
+                       <div className="grid grid-cols-2 gap-4">
+                           <CardInput icon={Box} placeholder="Porsi" type="number" value={record.volume} onChange={(e: any) => handleRecordChange(record.id, 'volume', e.target.value)} />
+                           <CardInput icon={DollarSign} placeholder="Harga (SAR)" type="number" value={record.price} onChange={(e: any) => handleRecordChange(record.id, 'price', e.target.value)} highlight />
                        </div>
                    </div>
                 </div>
             ))}
-            
-            <button 
-                onClick={addRecord}
-                className="flex flex-col items-center justify-center min-h-[350px] rounded-3xl border-2 border-dashed border-gray-300 bg-white/40 hover:bg-white/80 hover:border-[#D4AF37] hover:shadow-xl transition-all duration-300 group"
-            >
-                <div className="w-16 h-16 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 mb-4 group-hover:scale-110 group-hover:bg-[#D4AF37] group-hover:text-white group-hover:border-[#D4AF37] transition-all shadow-sm">
-                    <Plus size={32} />
-                </div>
-                <span className="text-sm font-bold text-gray-500 group-hover:text-[#D4AF37]">Tambah Menu Lain</span>
+            <button onClick={addRecord} className="flex flex-col items-center justify-center min-h-[250px] border-2 border-dashed border-gray-200 rounded-3xl hover:bg-[#064E3B]/5 hover:border-[#064E3B]/20 transition-all text-gray-400 font-bold gap-3 group">
+                <div className="w-14 h-14 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 shadow-sm group-hover:scale-110 transition-transform"><Plus size={24} /></div>
+                Tambah Perusahaan RTE
             </button>
           </div>
       </div>
@@ -193,18 +114,25 @@ export const RTEForm: React.FC<RTEFormProps> = ({ onBack }) => {
 };
 
 const PremiumInput = ({ label, icon: Icon, type = "text", value, onChange, placeholder }: any) => (
-    <div className="flex flex-col gap-2 group">
-        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2 group-focus-within:text-[#064E3B] transition-colors">
-            <Icon size={12} className="text-gray-400 group-focus-within:text-[#D4AF37] transition-colors" /> {label}
-        </label>
-        <div className="relative">
-            <input 
-                type={type} 
-                value={value} 
-                onChange={(e) => onChange(e.target.value)} 
-                className="w-full text-sm font-semibold text-gray-700 bg-white/60 border border-gray-200 rounded-xl px-4 py-3.5 focus:bg-white focus:border-[#064E3B] focus:ring-4 focus:ring-[#064E3B]/5 outline-none transition-all shadow-sm placeholder:font-medium placeholder:text-gray-300 hover:border-gray-300 hover:bg-white/80" 
-                placeholder={placeholder} 
-            />
+  <div className="flex flex-col gap-2 group">
+    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2 group-focus-within:text-[#064E3B] transition-colors">
+      <Icon size={12} className="text-gray-300 group-focus-within:text-[#D4AF37] transition-colors" /> {label}
+    </label>
+    <input type={type} value={value} onChange={e => onChange(e.target.value)} className="w-full text-sm font-semibold text-gray-700 bg-white/60 border border-gray-200 rounded-xl px-4 py-3.5 focus:bg-white focus:border-[#064E3B] focus:ring-4 focus:ring-[#064E3B]/5 outline-none transition-all placeholder:text-gray-300" placeholder={placeholder} />
+  </div>
+);
+
+const CardInput = ({ icon: Icon, value, onChange, placeholder, type = "text", highlight = false }: any) => (
+    <div className="relative group/input">
+        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within/input:text-[#064E3B] transition-colors">
+            <Icon size={16} className={highlight ? 'text-[#D4AF37]' : ''} />
         </div>
+        <input 
+            type={type} 
+            value={value} 
+            onChange={onChange} 
+            placeholder={placeholder}
+            className={`w-full bg-gray-50/50 border border-gray-100 rounded-xl py-3 pl-10 text-sm font-semibold text-gray-700 focus:bg-white focus:border-[#064E3B] focus:ring-2 focus:ring-[#064E3B]/10 outline-none transition-all placeholder:text-gray-300 ${highlight ? 'text-[#064E3B]' : ''}`}
+        />
     </div>
 );
